@@ -155,3 +155,41 @@ document.getElementById('btn-nova-ideia')?.addEventListener('click', () => {
     document.getElementById('editor-letras').scrollIntoView({ behavior: 'smooth' });
     areaEditorLetra.focus();
 });
+
+/**
+ * 5. FUNÇÃO PARA SALVAR MÚSICA (NOVA)
+ */
+async function salvarLetra() {
+    const letra = areaEditorLetra.value.trim();
+    if (!letra) {
+        alert("Digite uma letra antes de salvar!");
+        return;
+    }
+
+    const novaMusica = {
+        titulo: "Nova Música", // Você pode criar um input para o título depois
+        artista: "Grupo Santa Esmeralda",
+        categoria: "Adoração",
+        letra: letra
+    };
+
+    try {
+        // IMPORTANTE: Usando /musics (plural) como no seu server.js
+        const res = await fetch(`${API_URL}/musics`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novaMusica)
+        });
+
+        if (res.ok) {
+            areaEditorLetra.value = "";
+            carregarMusicas(); // Atualiza a lista lateral
+            alert("Música salva com sucesso!");
+        }
+    } catch (err) {
+        console.error("Erro ao salvar música:", err);
+    }
+}
+
+// Conectar o botão do HTML à função
+document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);

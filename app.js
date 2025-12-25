@@ -1,7 +1,7 @@
 // 1. CONFIGURAÇÃO DA URL (AJUSTADO)
 const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 
-    : 'https://seu-servidor-no-render.onrender.com'; // <--- Quando hospedar o backend, coloque o link aqui!
+    : 'https://grupo-de-louvor-santa-esmeralda.onrender.com'; // <--- Link real inserido aqui!
 
 /**
  * 1. ELEMENTOS

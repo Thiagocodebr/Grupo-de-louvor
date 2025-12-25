@@ -1,0 +1,221 @@
+/* RESET BÁSICO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* VARIÁVEIS DE CORES */
+:root {
+    --cor-fundo: #1e1e2d;
+    --cor-painel: #27293d;
+    --cor-destaque: #65b891; /* Verde/Ciano para destaque */
+    --cor-texto: #ffffff;
+    --cor-suave: #a9a9b9;
+    --cor-borda: #44485f;
+    --cor-botoes: #65b891;
+    --cor-botoes-hover: #4e9174;
+}
+
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    line-height: 1.6;
+    padding: 20px;
+}
+
+/* ESTRUTURA PRINCIPAL */
+.cabecalho {
+    background-color: var(--cor-painel);
+    padding: 20px 40px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.titulo-principal {
+    color: var(--cor-destaque);
+    font-size: 1.8rem;
+}
+
+.navegacao a {
+    color: var(--cor-suave);
+    text-decoration: none;
+    margin-left: 25px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.navegacao a:hover {
+    color: var(--cor-destaque);
+}
+
+.conteudo-principal {
+    display: grid;
+    /* Divide em 3 colunas, sendo a do meio ligeiramente maior */
+    grid-template-columns: 1fr 1.5fr 1fr; 
+    gap: 20px;
+}
+
+/* PAINÉIS */
+.painel {
+    background-color: var(--cor-painel);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid var(--cor-borda);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    min-height: 400px;
+}
+
+.painel h2 {
+    color: var(--cor-destaque);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+/* CAMPOS DE INPUT E TEXTAREA */
+.input-padrao, .textarea-editor {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--cor-borda);
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    border-radius: 4px;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+.input-padrao:focus, .textarea-editor:focus {
+    border-color: var(--cor-destaque);
+    outline: none;
+}
+
+.textarea-editor {
+    min-height: 150px;
+}
+
+/* BOTÕES (AÇÕES) */
+.btn-acao {
+    display: inline-block;
+    padding: 10px 18px;
+    background-color: var(--cor-botoes);
+    color: var(--cor-fundo); /* Texto escuro no botão claro */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-align: center;
+    transition: background-color 0.3s, transform 0.1s;
+    user-select: none; /* Evita seleção de texto ao passar o mouse */
+}
+
+.btn-acao:hover {
+    background-color: var(--cor-botoes-hover);
+    transform: translateY(-1px); /* Pequeno efeito 3D */
+}
+
+/* SEÇÃO CHAT */
+.chat-display {
+    height: 300px;
+    border: 1px solid var(--cor-borda);
+    padding: 10px;
+    margin-bottom: 15px;
+    overflow-y: auto; /* Permite scroll para mensagens antigas */
+    background-color: var(--cor-fundo);
+    border-radius: 4px;
+}
+
+.chat-input-area {
+    display: flex;
+}
+
+#chat-input {
+    flex-grow: 1;
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+/* SEÇÃO LINKS E UPLOAD */
+.referencias-box {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--cor-borda);
+}
+
+.referencias-box h3 {
+    font-size: 1rem;
+    color: var(--cor-suave);
+    margin-bottom: 10px;
+}
+
+/* ESTILIZAÇÃO PARA O TRUQUE DE UPLOAD DE ARQUIVO */
+/* O rótulo customizado para "Escolher Arquivo" */
+.custom-file-label {
+    margin-right: 10px;
+}
+
+.file-status {
+    color: var(--cor-suave);
+    font-size: 0.9rem;
+    margin-left: 5px;
+}
+
+/* RODAPÉ */
+.rodape {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--cor-borda);
+    color: var(--cor-suave);
+    font-size: 0.9rem;
+}
+
+/* RESPONSIVIDADE (Para telas menores) */
+@media (max-width: 1200px) {
+    .conteudo-principal {
+        /* Muda para duas colunas em telas menores */
+        grid-template-columns: 1fr 1fr;
+    }
+    .painel-letras {
+        /* O editor de letras ocupa duas colunas */
+        grid-column: span 2; 
+    }
+}
+
+@media (max-width: 768px) {
+    .conteudo-principal {
+        /* Em telas de celular, vira uma coluna única */
+        grid-template-columns: 1fr;
+    }
+    .painel-letras {
+        grid-column: span 1; 
+    }
+}
+
+/* Estilo para a música selecionada na lista */
+.item-musica.selecionada {
+    border-left: 5px solid #65b891 !important; /* Borda lateral verde */
+    background-color: rgba(101, 184, 145, 0.1) !important; /* Fundo suave */
+    transition: all 0.3s ease;
+}
+
+/* Efeito de destaque para a música selecionada */
+.item-musica.selecionada {
+    border-left: 6px solid #65b891 !important; /* Borda verde grossa na esquerda */
+    background-color: rgba(101, 184, 145, 0.15) !important; /* Fundo levemente esverdeado */
+    transition: all 0.2s ease-in-out;
+}
+
+.item-musica.selecionada {
+    border-left: 6px solid #65b891 !important;
+    background-color: rgba(101, 184, 145, 0.1) !important;
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo de Louvor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <audio id="audio-hover" src="audios/click-buttons-ui-menu-sounds-effects-button-14-205402.mp3" preload="auto"></audio>
+
+    <header class="cabecalho">
+        <h1 class="titulo-principal">🎶 Grupo de Louvor Santa Esmeralda</h1>
+        <nav class="navegacao">
+            <a href="#editor-letras" class="nav-link js-hover-target">Letras</a>
+            <a href="#ideias" class="nav-link js-hover-target">Ideias</a>
+            <a href="#chat" class="nav-link js-hover-target">Chat</a>
+            <a href="#upload-pdf" class="nav-link js-hover-target">Documentos</a>
+        </nav>
+    </header>
+
+    <main class="conteudo-principal">
+        
+        <section id="ideias" class="painel painel-ideias">
+            <h2>✨ Ideias, Músicas e Cronograma</h2>
+
+            <div style="padding: 10px 10px 0 10px; font-size: 0.9rem; color: var(--cor-suave);">
+                Repertório: <span id="contador-musicas" style="color: var(--cor-destaque); font-weight: bold;">0</span> músicas
+            </div>
+
+            <div style="padding: 10px;">
+                <input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." 
+                       style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--cor-borda); background: var(--cor-fundo); color: white;">
+            </div>
+
+            <div id="lista-musicas" class="lista-itens">
+                <p>Carregando repertório...</p>
+            </div>
+            
+            <button id="btn-nova-ideia" class="btn-acao js-hover-target">Adicionar Nova Ideia</button>
+
+            <div class="referencias-box">
+                <h3>🔗 Links de Referência (YouTube/Spotify)</h3>
+                <input type="url" id="link-referencia" class="input-padrao" placeholder="Cole o link do YouTube/Spotify aqui">
+                <button id="btn-abrir-link" class="btn-acao js-hover-target js-link-opener">Abrir Link</button>
+            </div>
+        </section>
+
+        <section id="editor-letras" class="painel painel-letras">
+            <h2>✍️ Editor de Letras e Upload de Partituras</h2>
+            
+            <div class="editor-area">
+                <textarea id="texto-letra" class="input-padrao textarea-editor" placeholder="Digite ou cole a letra da música aqui..."></textarea>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                    <button id="btn-salvar-letra" class="btn-acao js-hover-target">Salvar Letra</button>
+                    <button id="btn-gerar-pdf" class="btn-acao js-hover-target" style="background-color: #eb4d4b;">Gerar PDF</button>
+                    <button id="btn-limpar-editor" class="btn-acao js-hover-target" style="background-color: #7f8c8d;">Limpar Editor</button>
+                </div>
+            </div>
+            
+            <div class="upload-box">
+                <h3>📂 Upload de Documentos (PDF)</h3>
+                <input type="file" id="upload-pdf" accept=".pdf">
+                <button id="btn-enviar-pdf" class="btn-acao js-hover-target">Fazer Upload</button>
+            </div>
+        </section>
+
+        <section id="chat" class="painel painel-chat">
+            <h2>💬 Chat de Diálogo</h2>
+            <div id="chat-mensagens" class="chat-display" style="height: 300px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                <p class="mensagem-inicial">Bem-vindos ao chat! Comecem a conversar.</p>
+            </div>
+            <div class="chat-input-area" style="display: flex; gap: 10px;">
+                <input type="text" id="chat-input" class="input-padrao" placeholder="Digite sua mensagem..." style="flex-grow: 1;">
+                <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: auto; padding: 0 20px;">Enviar</button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="rodape">
+        <p>&copy; 2025 Plataforma Colaborativa. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -47,7 +47,7 @@ function renderizarLista(musicas) {
 
 async function carregarMusicas() {
     try {
-        console.log("Buscando músicas em:", `${API_URL}/musics`);
+        console.log("Tentando carregar músicas de:", `${API_URL}/musics`);
         const res = await fetch(`${API_URL}/musics`);
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
@@ -77,7 +77,7 @@ window.excluirMusica = async (id) => {
  * 4. FUNÇÃO SALVAR (O CORAÇÃO DO SISTEMA)
  */
 async function salvarLetra() {
-    console.log("Botão Salvar clicado!"); // Log para confirmar que o clique funciona
+    console.log(">>> Botão Salvar foi clicado!"); // Confirmação de clique no console
     const letra = areaEditorLetra.value.trim();
     
     if (!letra) {
@@ -93,7 +93,7 @@ async function salvarLetra() {
     };
 
     try {
-        console.log("Enviando dados para o servidor...");
+        console.log("Enviando POST para:", `${API_URL}/musics`);
         const res = await fetch(`${API_URL}/musics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -101,17 +101,17 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
-            console.log("Música salva com sucesso no banco de dados!");
+            console.log("✅ Salvo com sucesso no servidor!");
             alert("Música salva com sucesso!");
             areaEditorLetra.value = "";
             await carregarMusicas();
         } else {
             const erroTxt = await res.text();
-            console.error("Erro retornado pelo servidor:", erroTxt);
+            console.error("❌ O servidor recusou o salvamento:", erroTxt);
             alert("Erro no servidor ao salvar.");
         }
     } catch (err) {
-        console.error("Erro de conexão/rede:", err);
+        console.error("❌ Erro de conexão (O site não alcançou o servidor):", err);
         alert("Erro de conexão com o servidor.");
     }
 }
@@ -153,18 +153,18 @@ async function enviarMensagem() {
  * 6. INICIALIZAÇÃO E EVENTOS
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Página carregada. Inicializando scripts...");
+    console.log("🚀 Scripts inicializados com sucesso!");
     carregarMusicas();
     carregarMensagens();
     setInterval(carregarMensagens, 5000); 
 
-    // Conectar botões
+    // Conectar botões com verificação de segurança
     const btnSalvar = document.getElementById('btn-salvar-letra');
     if (btnSalvar) {
-        console.log("Botão de salvar encontrado e configurado.");
+        console.log("✅ Botão de salvar encontrado e vinculado.");
         btnSalvar.addEventListener('click', salvarLetra);
     } else {
-        console.error("ERRO: Botão 'btn-salvar-letra' não encontrado no HTML!");
+        console.error("❌ ERRO CRÍTICO: O botão 'btn-salvar-letra' não existe no seu HTML!");
     }
 
     btnEnviarChat?.addEventListener('click', enviarMensagem);

@@ -47,10 +47,13 @@ function renderizarLista(musicas) {
 
 async function carregarMusicas() {
     try {
+        console.log("Buscando músicas em:", `${API_URL}/musics`);
         const res = await fetch(`${API_URL}/musics`);
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
-    } catch (err) { console.error("Erro ao carregar músicas:", err); }
+    } catch (err) { 
+        console.error("Erro ao carregar músicas:", err); 
+    }
 }
 
 window.exibirLetra = (id) => {
@@ -74,7 +77,9 @@ window.excluirMusica = async (id) => {
  * 4. FUNÇÃO SALVAR (O CORAÇÃO DO SISTEMA)
  */
 async function salvarLetra() {
+    console.log("Botão Salvar clicado!"); // Log para confirmar que o clique funciona
     const letra = areaEditorLetra.value.trim();
+    
     if (!letra) {
         alert("Por favor, digite uma letra antes de salvar!");
         return;
@@ -88,6 +93,7 @@ async function salvarLetra() {
     };
 
     try {
+        console.log("Enviando dados para o servidor...");
         const res = await fetch(`${API_URL}/musics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -95,14 +101,17 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
+            console.log("Música salva com sucesso no banco de dados!");
             alert("Música salva com sucesso!");
             areaEditorLetra.value = "";
             await carregarMusicas();
         } else {
+            const erroTxt = await res.text();
+            console.error("Erro retornado pelo servidor:", erroTxt);
             alert("Erro no servidor ao salvar.");
         }
     } catch (err) {
-        console.error("Erro na requisição:", err);
+        console.error("Erro de conexão/rede:", err);
         alert("Erro de conexão com o servidor.");
     }
 }
@@ -144,12 +153,20 @@ async function enviarMensagem() {
  * 6. INICIALIZAÇÃO E EVENTOS
  */
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Página carregada. Inicializando scripts...");
     carregarMusicas();
     carregarMensagens();
     setInterval(carregarMensagens, 5000); 
 
     // Conectar botões
-    document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
+    const btnSalvar = document.getElementById('btn-salvar-letra');
+    if (btnSalvar) {
+        console.log("Botão de salvar encontrado e configurado.");
+        btnSalvar.addEventListener('click', salvarLetra);
+    } else {
+        console.error("ERRO: Botão 'btn-salvar-letra' não encontrado no HTML!");
+    }
+
     btnEnviarChat?.addEventListener('click', enviarMensagem);
     
     chatInput?.addEventListener('keypress', (e) => { 
@@ -160,5 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const termo = e.target.value.toLowerCase();
         const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
         renderizarLista(filtradas);
+    });
+
+    // Limpar editor
+    document.getElementById('btn-limpar-editor')?.addEventListener('click', () => {
+        areaEditorLetra.value = "";
     });
 });

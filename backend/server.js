@@ -5,11 +5,14 @@ const mongoose = require('mongoose');
 const Music = require('./models/Music');
 
 const app = express();
+
+// Configuração de CORS atualizada para os seus domínios
 app.use(cors({
     origin: ['https://thiagocodebr.github.io', 'http://127.0.0.1:5500', 'http://localhost:5500'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
+
 app.use(express.json());
 
 const MONGO_URI = process.env.MONGO_URI;
@@ -23,11 +26,12 @@ app.get('/', (req, res) => {
     res.send('Servidor do Grupo de Louvor está Online!');
 });
 
+// Rota POST atualizada para receber links
 app.post('/musics', async (req, res) => {
     try {
         const novaMusica = new Music(req.body);
         await novaMusica.save();
-        res.status(201).json({ mensagem: "✅ Música salva!", dados: novaMusica });
+        res.status(201).json({ mensagem: "✅ Música e Links salvos!", dados: novaMusica });
     } catch (err) {
         res.status(400).json({ mensagem: "❌ Erro ao salvar", erro: err.message });
     }
@@ -67,7 +71,6 @@ app.post('/messages', async (req, res) => {
     } catch (err) { res.status(500).send(err); }
 });
 
-// --- INICIALIZAÇÃO ---
 const PORT = process.env.PORT || 5000; 
 app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando na porta ${PORT}`);

@@ -14,7 +14,13 @@ const chatDisplay = document.getElementById('chat-mensagens');
 const chatInput = document.getElementById('chat-input');
 const btnEnviarChat = document.getElementById('btn-enviar-chat');
 
+// Elementos novos para os Links
+const btnAddLink = document.getElementById('btn-add-link');
+const inputLink = document.getElementById('link-referencia');
+const listaLinksDinamica = document.getElementById('lista-links-dinamica');
+
 let todasAsMusicas = []; 
+let listaTemporariaLinks = []; // Armazena os links antes de salvar
 
 /**
  * 3. LÓGICA DE MÚSICAS (CARREGAR E EXIBIR)
@@ -74,12 +80,10 @@ window.excluirMusica = async (id) => {
 };
 
 /**
- * 4. FUNÇÃO SALVAR (O CORAÇÃO DO SISTEMA)
+ * 4. FUNÇÃO SALVAR MÚSICA
  */
 async function salvarLetra() {
-    console.log(">>> Botão Salvar foi clicado!"); // Confirmação de clique no console
     const letra = areaEditorLetra.value.trim();
-    
     if (!letra) {
         alert("Por favor, digite uma letra antes de salvar!");
         return;
@@ -93,7 +97,6 @@ async function salvarLetra() {
     };
 
     try {
-        console.log("Enviando POST para:", `${API_URL}/musics`);
         const res = await fetch(`${API_URL}/musics`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -101,23 +104,15 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
-            console.log("✅ Salvo com sucesso no servidor!");
             alert("Música salva com sucesso!");
             areaEditorLetra.value = "";
             await carregarMusicas();
-        } else {
-            const erroTxt = await res.text();
-            console.error("❌ O servidor recusou o salvamento:", erroTxt);
-            alert("Erro no servidor ao salvar.");
         }
-    } catch (err) {
-        console.error("❌ Erro de conexão (O site não alcançou o servidor):", err);
-        alert("Erro de conexão com o servidor.");
-    }
+    } catch (err) { console.error("Erro ao salvar:", err); }
 }
 
 /**
- * 5. LÓGICA DO CHAT
+ * 5. LÓGICA DO CHAT E IDEIAS
  */
 async function carregarMensagens() {
     try {
@@ -149,6 +144,41 @@ async function enviarMensagem() {
     } catch (err) { console.error("Erro ao enviar mensagem:", err); }
 }
 
+async function adicionarNovaIdeia() {
+    const ideia = prompt("Digite sua ideia de música ou anotação para o grupo:");
+    if (!ideia) return;
+
+    try {
+        await fetch(`${API_URL}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto: `💡 IDEIA: ${ideia}` })
+        });
+        alert("Ideia enviada para o mural!");
+        carregarMensagens();
+    } catch (err) { console.error("Erro ao salvar ideia:", err); }
+}
+
+/**
+ * 5.1 LÓGICA DE LINKS DINÂMICOS
+ */
+function renderizarLinks() {
+    if (!listaLinksDinamica) return;
+    listaLinksDinamica.innerHTML = listaTemporariaLinks.map((link, index) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,209,178,0.1); padding: 8px; border-radius: 5px; border-left: 4px solid #00d1b2; margin-bottom: 5px;">
+            <a href="${link}" target="_blank" style="color: #00d1b2; text-decoration: none; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">
+                ${link}
+            </a>
+            <button onclick="removerLinkDaLista(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 1.2rem;">🗑️</button>
+        </div>
+    `).join('');
+}
+
+window.removerLinkDaLista = (index) => {
+    listaTemporariaLinks.splice(index, 1);
+    renderizarLinks();
+};
+
 /**
  * 6. INICIALIZAÇÃO E EVENTOS
  */
@@ -158,15 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarMensagens();
     setInterval(carregarMensagens, 5000); 
 
-    // Conectar botões com verificação de segurança
-    const btnSalvar = document.getElementById('btn-salvar-letra');
-    if (btnSalvar) {
-        console.log("✅ Botão de salvar encontrado e vinculado.");
-        btnSalvar.addEventListener('click', salvarLetra);
-    } else {
-        console.error("❌ ERRO CRÍTICO: O botão 'btn-salvar-letra' não existe no seu HTML!");
-    }
+    // Evento para Adicionar Link na Lista
+    btnAddLink?.addEventListener('click', () => {
+        const url = inputLink.value.trim();
+        if (url) {
+            listaTemporariaLinks.push(url);
+            renderizarLinks();
+            inputLink.value = '';
+        }
+    });
 
+    // Vinculação de Botões
+    document.getElementById('btn-nova-ideia')?.addEventListener('click', adicionarNovaIdeia);
+    document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     btnEnviarChat?.addEventListener('click', enviarMensagem);
     
     chatInput?.addEventListener('keypress', (e) => { 
@@ -179,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarLista(filtradas);
     });
 
-    // Limpar editor
     document.getElementById('btn-limpar-editor')?.addEventListener('click', () => {
         areaEditorLetra.value = "";
     });

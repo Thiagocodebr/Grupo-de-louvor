@@ -14,13 +14,13 @@ const chatDisplay = document.getElementById('chat-mensagens');
 const chatInput = document.getElementById('chat-input');
 const btnEnviarChat = document.getElementById('btn-enviar-chat');
 
-// Elementos novos para os Links
+// Elementos para os Links
 const btnAddLink = document.getElementById('btn-add-link');
 const inputLink = document.getElementById('link-referencia');
 const listaLinksDinamica = document.getElementById('lista-links-dinamica');
 
 let todasAsMusicas = []; 
-let listaTemporariaLinks = []; // Armazena os links antes de salvar
+let listaTemporariaLinks = []; // Armazena os links antes de salvar ou os links da música aberta
 
 /**
  * 3. LÓGICA DE MÚSICAS (CARREGAR E EXIBIR)
@@ -61,10 +61,20 @@ async function carregarMusicas() {
     }
 }
 
+// ATUALIZADO: Agora carrega os links salvos no banco para a tela
 window.exibirLetra = (id) => {
     const musica = todasAsMusicas.find(m => m._id === id);
     if (musica) {
+        // Coloca a letra no editor
         areaEditorLetra.value = musica.letra;
+        
+        // Pega os links que vieram do banco de dados (se não houver, fica vazio)
+        listaTemporariaLinks = musica.links || []; 
+        
+        // Atualiza a listinha azul na tela
+        renderizarLinks();
+
+        // Destaca a música selecionada na lista lateral
         document.querySelectorAll('.item-musica').forEach(i => i.classList.remove('selecionada'));
         document.getElementById(`musica-${id}`)?.classList.add('selecionada');
     }
@@ -79,19 +89,21 @@ window.excluirMusica = async (id) => {
 };
 
 /**
- * 4. FUNÇÃO SALVAR MÚSICA
+ * 4. FUNÇÃO SALVAR MÚSICA (ATUALIZADA)
  */
 async function salvarLetra() {
     const letra = areaEditorLetra.value.trim();
     if (!letra) return alert("Digite uma letra antes de salvar!");
 
-    // Agora pegamos os dados e incluímos a lista de links
+    const titulo = prompt("Digite o nome da música:");
+    if (!titulo) return;
+
     const novaMusica = {
-        titulo: "Salvo em " + new Date().toLocaleTimeString(),
+        titulo: titulo,
         artista: "Grupo Santa Esmeralda",
         categoria: "Adoração",
         letra: letra,
-        links: listaTemporariaLinks // <-- Enviando os links da lista azul!
+        links: listaTemporariaLinks // Envia a lista de links para o banco
     };
 
     try {
@@ -104,14 +116,15 @@ async function salvarLetra() {
         if (res.ok) {
             alert("Música e links salvos com sucesso!");
             areaEditorLetra.value = "";
-            listaTemporariaLinks = []; // Limpa a lista de links após salvar
-            renderizarLinks();        // Atualiza a tela (limpa os balões azuis)
+            listaTemporariaLinks = []; 
+            renderizarLinks();
             await carregarMusicas();
         }
     } catch (err) { 
         console.error("Erro ao salvar no banco:", err); 
     }
 }
+
 /**
  * 5. LÓGICA DO CHAT E IDEIAS
  */
@@ -166,7 +179,7 @@ async function adicionarNovaIdeia() {
 function renderizarLinks() {
     if (!listaLinksDinamica) return;
     listaLinksDinamica.innerHTML = listaTemporariaLinks.map((link, index) => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,209,178,0.1); padding: 8px; border-radius: 5px; border-left: 4px solid #00d1b2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,209,178,0.1); padding: 8px; border-radius: 5px; border-left: 4px solid #00d1b2; margin-bottom: 5px;">
             <a href="${link}" target="_blank" style="color: #00d1b2; text-decoration: none; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">
                 ${link}
             </a>
@@ -189,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarMensagens();
     setInterval(carregarMensagens, 5000); 
 
-    // Evento para Adicionar Link na Lista
     btnAddLink?.addEventListener('click', () => {
         const url = inputLink.value.trim();
         if (url) {
@@ -199,7 +211,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Vinculação de Botões Existentes
     document.getElementById('btn-nova-ideia')?.addEventListener('click', adicionarNovaIdeia);
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     btnEnviarChat?.addEventListener('click', enviarMensagem);
@@ -216,5 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-limpar-editor')?.addEventListener('click', () => {
         areaEditorLetra.value = "";
+        listaTemporariaLinks = [];
+        renderizarLinks();
     });
 });

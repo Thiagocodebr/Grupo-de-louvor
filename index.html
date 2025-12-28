@@ -42,8 +42,12 @@
 
             <div class="referencias-box">
                 <h3>🔗 Links de Referência (YouTube/Spotify)</h3>
-                <input type="url" id="link-referencia" class="input-padrao" placeholder="Cole o link do YouTube/Spotify aqui">
-                <button id="btn-abrir-link" class="btn-acao js-hover-target js-link-opener">Abrir Link</button>
+                <div style="display: flex; gap: 8px;">
+                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Cole o link aqui..." style="flex-grow: 1;">
+                    <button id="btn-add-link" class="btn-acao js-hover-target" style="width: 50px; background-color: #00d1b2; color: black; font-weight: bold;">+</button>
+                </div>
+                <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    </div>
             </div>
         </section>
 
@@ -83,6 +87,6 @@
         <p>&copy; 2025 Plataforma Colaborativa. Todos os direitos reservados.</p>
     </footer>
 
-    <script src="app.js?v=10"></script>
+    <script src="app.js?v=11"></script>
 </body>
 </html>

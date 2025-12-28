@@ -53,7 +53,6 @@ function renderizarLista(musicas) {
 
 async function carregarMusicas() {
     try {
-        console.log("Tentando carregar músicas de:", `${API_URL}/musics`);
         const res = await fetch(`${API_URL}/musics`);
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
@@ -84,16 +83,15 @@ window.excluirMusica = async (id) => {
  */
 async function salvarLetra() {
     const letra = areaEditorLetra.value.trim();
-    if (!letra) {
-        alert("Por favor, digite uma letra antes de salvar!");
-        return;
-    }
+    if (!letra) return alert("Digite uma letra antes de salvar!");
 
+    // Agora pegamos os dados e incluímos a lista de links
     const novaMusica = {
-        titulo: "Música salva em " + new Date().toLocaleTimeString(),
+        titulo: "Salvo em " + new Date().toLocaleTimeString(),
         artista: "Grupo Santa Esmeralda",
         categoria: "Adoração",
-        letra: letra
+        letra: letra,
+        links: listaTemporariaLinks // <-- Enviando os links da lista azul!
     };
 
     try {
@@ -104,13 +102,16 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
-            alert("Música salva com sucesso!");
+            alert("Música e links salvos com sucesso!");
             areaEditorLetra.value = "";
+            listaTemporariaLinks = []; // Limpa a lista de links após salvar
+            renderizarLinks();        // Atualiza a tela (limpa os balões azuis)
             await carregarMusicas();
         }
-    } catch (err) { console.error("Erro ao salvar:", err); }
+    } catch (err) { 
+        console.error("Erro ao salvar no banco:", err); 
+    }
 }
-
 /**
  * 5. LÓGICA DO CHAT E IDEIAS
  */
@@ -165,7 +166,7 @@ async function adicionarNovaIdeia() {
 function renderizarLinks() {
     if (!listaLinksDinamica) return;
     listaLinksDinamica.innerHTML = listaTemporariaLinks.map((link, index) => `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,209,178,0.1); padding: 8px; border-radius: 5px; border-left: 4px solid #00d1b2; margin-bottom: 5px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,209,178,0.1); padding: 8px; border-radius: 5px; border-left: 4px solid #00d1b2;">
             <a href="${link}" target="_blank" style="color: #00d1b2; text-decoration: none; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80%;">
                 ${link}
             </a>
@@ -183,7 +184,7 @@ window.removerLinkDaLista = (index) => {
  * 6. INICIALIZAÇÃO E EVENTOS
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 Scripts inicializados com sucesso!");
+    console.log("🚀 Scripts inicializados!");
     carregarMusicas();
     carregarMensagens();
     setInterval(carregarMensagens, 5000); 
@@ -198,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Vinculação de Botões
+    // Vinculação de Botões Existentes
     document.getElementById('btn-nova-ideia')?.addEventListener('click', adicionarNovaIdeia);
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     btnEnviarChat?.addEventListener('click', enviarMensagem);

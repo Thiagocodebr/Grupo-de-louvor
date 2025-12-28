@@ -14,19 +14,29 @@ const chatDisplay = document.getElementById('chat-mensagens');
 const chatInput = document.getElementById('chat-input');
 const btnEnviarChat = document.getElementById('btn-enviar-chat');
 
+// Novo elemento para Categoria (Certifique-se de ter um <select id="select-categoria"> no seu HTML)
+const selectCategoria = document.getElementById('select-categoria');
+
 // Elementos para os Links
 const btnAddLink = document.getElementById('btn-add-link');
 const inputLink = document.getElementById('link-referencia');
 const listaLinksDinamica = document.getElementById('lista-links-dinamica');
 
 let todasAsMusicas = []; 
-let listaTemporariaLinks = []; // Armazena os links antes de salvar ou os links da música aberta
+let listaTemporariaLinks = []; 
 
 /**
  * 3. LÓGICA DE MÚSICAS (CARREGAR E EXIBIR)
  */
 function obterCorCategoria(categoria) {
-    const cores = { 'Adoração': '#3498db', 'Celebração': '#f1c40f', 'Especial': '#9b59b6', 'Início': '#2ecc71' };
+    const cores = { 
+        'Adoração': '#3498db', 
+        'Celebração': '#f1c40f', 
+        'Especial': '#9b59b6', 
+        'Início': '#2ecc71',
+        'Santa Ceia': '#e74c3c', // Cor para Santa Ceia
+        'Missão': '#e67e22'      // Cor para Missão
+    };
     return cores[categoria] || '#7f8c8d';
 }
 
@@ -44,7 +54,7 @@ function renderizarLista(musicas) {
                     ${m.categoria || 'Geral'}
                 </span><br>
                 <strong style="color: #fff">${m.titulo}</strong><br>
-                <small style="color: #ccc">${m.artista}</small>
+                <small style="color: #ccc">${m.artista || 'Grupo Santa Esmeralda'}</small>
             </div>
             <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color: #ff4d4d; cursor:pointer; font-size: 1.2rem;">🗑️</button>
         </div>
@@ -61,27 +71,21 @@ async function carregarMusicas() {
     }
 }
 
-// ATUALIZADO: Agora carrega os links salvos no banco para a tela
 window.exibirLetra = (id) => {
     const musica = todasAsMusicas.find(m => m._id === id);
     if (musica) {
-        // Coloca a letra no editor
-        areaEditorLetra.value = musica.letra;
-        
-        // Pega os links que vieram do banco de dados (se não houver, fica vazio)
+        areaEditorLetra.value = musica.letra || "";
+        if (selectCategoria) selectCategoria.value = musica.categoria || "Adoração";
         listaTemporariaLinks = musica.links || []; 
-        
-        // Atualiza a listinha azul na tela
         renderizarLinks();
 
-        // Destaca a música selecionada na lista lateral
         document.querySelectorAll('.item-musica').forEach(i => i.classList.remove('selecionada'));
         document.getElementById(`musica-${id}`)?.classList.add('selecionada');
     }
 };
 
 window.excluirMusica = async (id) => {
-    if (!confirm("Deseja realmente excluir esta música?")) return;
+    if (!confirm("Deseja realmente excluir este registro?")) return;
     try {
         await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
         carregarMusicas();
@@ -89,21 +93,21 @@ window.excluirMusica = async (id) => {
 };
 
 /**
- * 4. FUNÇÃO SALVAR MÚSICA (ATUALIZADA)
+ * 4. FUNÇÃO SALVAR TUDO (Título, Links, Categoria e Letra)
  */
 async function salvarLetra() {
-    const letra = areaEditorLetra.value.trim();
-    if (!letra) return alert("Digite uma letra antes de salvar!");
-
-    const titulo = prompt("Digite o nome da música:");
+    const titulo = prompt("Digite o nome da música ou referência:");
     if (!titulo) return;
+
+    const letra = areaEditorLetra.value.trim();
+    const categoria = selectCategoria ? selectCategoria.value : "Adoração";
 
     const novaMusica = {
         titulo: titulo,
         artista: "Grupo Santa Esmeralda",
-        categoria: "Adoração",
-        letra: letra,
-        links: listaTemporariaLinks // Envia a lista de links para o banco
+        categoria: categoria,
+        letra: letra, // Pode ir vazio agora
+        links: listaTemporariaLinks // Envia a lista azul de links
     };
 
     try {
@@ -114,19 +118,21 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
-            alert("Música e links salvos com sucesso!");
+            alert("Informações salvas com sucesso!");
+            // Limpar campos
             areaEditorLetra.value = "";
             listaTemporariaLinks = []; 
             renderizarLinks();
             await carregarMusicas();
         }
     } catch (err) { 
-        console.error("Erro ao salvar no banco:", err); 
+        console.error("Erro ao salvar:", err); 
+        alert("Erro ao conectar com o servidor.");
     }
 }
 
 /**
- * 5. LÓGICA DO CHAT E IDEIAS
+ * 5. LÓGICA DO CHAT E LINKS DINÂMICOS
  */
 async function carregarMensagens() {
     try {
@@ -158,24 +164,6 @@ async function enviarMensagem() {
     } catch (err) { console.error("Erro ao enviar mensagem:", err); }
 }
 
-async function adicionarNovaIdeia() {
-    const ideia = prompt("Digite sua ideia de música ou anotação para o grupo:");
-    if (!ideia) return;
-
-    try {
-        await fetch(`${API_URL}/messages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto: `💡 IDEIA: ${ideia}` })
-        });
-        alert("Ideia enviada para o mural!");
-        carregarMensagens();
-    } catch (err) { console.error("Erro ao salvar ideia:", err); }
-}
-
-/**
- * 5.1 LÓGICA DE LINKS DINÂMICOS
- */
 function renderizarLinks() {
     if (!listaLinksDinamica) return;
     listaLinksDinamica.innerHTML = listaTemporariaLinks.map((link, index) => `
@@ -194,13 +182,12 @@ window.removerLinkDaLista = (index) => {
 };
 
 /**
- * 6. INICIALIZAÇÃO E EVENTOS
+ * 6. INICIALIZAÇÃO
  */
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 Scripts inicializados!");
     carregarMusicas();
     carregarMensagens();
-    setInterval(carregarMensagens, 5000); 
+    setInterval(carregarMensagens, 8000); 
 
     btnAddLink?.addEventListener('click', () => {
         const url = inputLink.value.trim();
@@ -211,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('btn-nova-ideia')?.addEventListener('click', adicionarNovaIdeia);
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     btnEnviarChat?.addEventListener('click', enviarMensagem);
     

@@ -219,3 +219,86 @@ body {
     transform: translateX(5px);
     transition: all 0.3s ease;
 }
+
+/* --- GAVETA DE LINKS (TOPO DO EDITOR) --- */
+#lista-links-visualizacao a {
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+#lista-links-visualizacao a:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* Cores Oficiais para YouTube e Spotify */
+#lista-links-visualizacao a[href*="youtube"] { background-color: #c4302b !important; }
+#lista-links-visualizacao a[href*="spotify"] { background-color: #1DB954 !important; }
+
+/* --- MURAL DE IDEIAS (CARDS DESTACADOS) --- */
+#mural-ideias-display div {
+    background: linear-gradient(145deg, rgba(241, 196, 15, 0.1), rgba(241, 196, 15, 0.02)) !important;
+    border-left: 4px solid #f1c40f !important;
+    padding: 12px !important;
+    margin-bottom: 12px;
+    border-radius: 4px 8px 8px 4px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.5s ease-out;
+}
+
+#mural-ideias-display p {
+    color: #fff;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* --- CHAT EM TEMPO REAL (ESTILO BALÃO) --- */
+#chat-mensagens div {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px 14px;
+    border-radius: 15px 15px 15px 2px;
+    margin-bottom: 10px;
+    max-width: 90%;
+    border: 1px solid rgba(0, 209, 178, 0.1);
+    position: relative;
+}
+
+#chat-mensagens strong {
+    display: block;
+    margin-bottom: 3px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* --- SCROLLBARS PERSONALIZADAS (Para ficar elegante) --- */
+#mural-ideias-display::-webkit-scrollbar,
+#chat-mensagens::-webkit-scrollbar,
+.lista-itens::-webkit-scrollbar {
+    width: 6px;
+}
+
+#mural-ideias-display::-webkit-scrollbar-thumb,
+#chat-mensagens::-webkit-scrollbar-thumb,
+.lista-itens::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+#mural-ideias-display::-webkit-scrollbar-thumb:hover,
+#chat-mensagens::-webkit-scrollbar-thumb:hover {
+    background: var(--cor-destaque);
+}
+
+/* Animação para novas mensagens */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}

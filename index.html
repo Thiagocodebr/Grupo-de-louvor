@@ -14,7 +14,7 @@
         <h1 class="titulo-principal">🎶 Grupo de Louvor Santa Esmeralda</h1>
         <nav class="navegacao">
             <a href="#editor-letras" class="nav-link js-hover-target">Letras</a>
-            <a href="#mural-ideias" class="nav-link js-hover-target">Mural de Ideias</a>
+            <a href="#repertorio" class="nav-link js-hover-target">Repertório</a>
             <a href="#upload-pdf" class="nav-link js-hover-target">Documentos</a>
         </nav>
     </header>
@@ -44,8 +44,7 @@
                     <input type="url" id="link-referencia" class="input-padrao" placeholder="Link do YouTube/Spotify..." style="flex-grow: 1;">
                     <button id="btn-add-link" class="btn-acao js-hover-target" style="width: 50px; background-color: #00d1b2; color: black; font-weight: bold;">+</button>
                 </div>
-                <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                    </div>
+                <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
         </section>
 
@@ -87,18 +86,27 @@
             </div>
         </section>
 
-        <section id="mural-ideias" class="painel painel-chat">
-            <h2>💡 Mural de Ideias</h2>
-            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Sugestões de novas músicas e avisos para o grupo.</p>
+        <section class="painel painel-chat">
             
-            <div id="chat-mensagens" class="chat-display" style="height: 400px; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;">
-                </div>
-
-            <div class="chat-input-area" style="display: flex; flex-direction: column; gap: 10px;">
-                <input type="text" id="chat-input" class="input-padrao" placeholder="Escreva uma ideia ou aviso...">
-                <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: 100%;">Postar no Mural</button>
-                <button id="btn-nova-ideia" class="btn-acao js-hover-target" style="background-color: #f1c40f; color: black;">💡 Sugerir Música Específica</button>
+            <div style="margin-bottom: 25px;">
+                <h2 style="color: #f1c40f;">💡 Mural de Ideias</h2>
+                <div id="mural-ideias-display" style="height: 200px; overflow-y: auto; background: rgba(241, 196, 15, 0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.2); margin-bottom: 10px;">
+                    </div>
+                <button id="btn-nova-ideia" class="btn-acao js-hover-target" style="background-color: #f1c40f; color: black; font-weight: bold; width: 100%;">+ Sugerir Música ou Ideia</button>
             </div>
+
+            <hr style="border: 0; border-top: 1px solid #333; margin-bottom: 25px;">
+
+            <div>
+                <h2 style="color: #00d1b2;">💬 Chat em Tempo Real</h2>
+                <div id="chat-mensagens" class="chat-display" style="height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;">
+                    </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="chat-input" class="input-padrao" placeholder="Digite uma mensagem..." style="flex-grow: 1;">
+                    <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: auto; padding: 0 15px;">Enviar</button>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -107,6 +115,6 @@
         <p>&copy; 2025 Plataforma Colaborativa Santa Esmeralda. Todos os direitos reservados.</p>
     </footer>
 
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>

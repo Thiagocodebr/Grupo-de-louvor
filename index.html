@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo de Louvor</title>
+    <title>Grupo de Louvor Santa Esmeralda</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,16 +14,15 @@
         <h1 class="titulo-principal">🎶 Grupo de Louvor Santa Esmeralda</h1>
         <nav class="navegacao">
             <a href="#editor-letras" class="nav-link js-hover-target">Letras</a>
-            <a href="#ideias" class="nav-link js-hover-target">Ideias</a>
-            <a href="#chat" class="nav-link js-hover-target">Chat</a>
+            <a href="#mural-ideias" class="nav-link js-hover-target">Mural de Ideias</a>
             <a href="#upload-pdf" class="nav-link js-hover-target">Documentos</a>
         </nav>
     </header>
 
     <main class="conteudo-principal">
         
-        <section id="ideias" class="painel painel-ideias">
-            <h2>✨ Ideias, Músicas e Cronograma</h2>
+        <section id="repertorio" class="painel painel-ideias">
+            <h2>✨ Repertório e Cadastro</h2>
 
             <div style="padding: 10px 10px 0 10px; font-size: 0.9rem; color: var(--cor-suave);">
                 Repertório: <span id="contador-musicas" style="color: var(--cor-destaque); font-weight: bold;">0</span> músicas
@@ -38,12 +37,11 @@
                 <p>Carregando repertório...</p>
             </div>
             
-            <button id="btn-nova-ideia" class="btn-acao js-hover-target">Adicionar Nova Ideia</button>
-
-            <div class="referencias-box">
-                <h3>🔗 Links de Referência (YouTube/Spotify)</h3>
+            <div class="referencias-box" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
+                <h3>🔗 Adicionar Referência Temporária</h3>
+                <small style="color: #888; display: block; margin-bottom: 5px;">Cole aqui antes de salvar a letra:</small>
                 <div style="display: flex; gap: 8px;">
-                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Cole o link aqui..." style="flex-grow: 1;">
+                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link do YouTube/Spotify..." style="flex-grow: 1;">
                     <button id="btn-add-link" class="btn-acao js-hover-target" style="width: 50px; background-color: #00d1b2; color: black; font-weight: bold;">+</button>
                 </div>
                 <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
@@ -51,57 +49,64 @@
             </div>
         </section>
 
-        <label for="select-categoria">Classificação:</label>
-<select id="select-categoria" class="estilo-select">
-    <option value="Adoração">Adoração</option>
-    <option value="Celebração">Celebração</option>
-    <option value="Santa Ceia">Santa Ceia</option>
-    <option value="Missão">Missão</option>
-</select>
-
-        <select id="select-categoria" style="padding: 10px; border-radius: 5px; background: #333; color: white; margin-bottom: 10px;">
-    <option value="Adoração">Adoração</option>
-    <option value="Celebração">Celebração</option>
-    <option value="Santa Ceia">Santa Ceia</option>
-    <option value="Missão">Missão</option>
-</select>
-        
         <section id="editor-letras" class="painel painel-letras">
-            <h2>✍️ Editor de Letras e Upload de Partituras</h2>
+            <h2>✍️ Editor de Letras</h2>
+
+            <div id="area-links-salvos" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444;">
+                <small style="color: #00d1b2; font-weight: bold;">📺 Referências Salvas:</small>
+                <div id="lista-links-visualizacao" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                    <span style="color: #666; font-size: 0.8rem;">Clique em uma música para ver os links</span>
+                </div>
+            </div>
             
             <div class="editor-area">
+                <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <label for="select-categoria" style="font-size: 0.9rem;">Classificação:</label>
+                    <select id="select-categoria" style="padding: 5px 10px; border-radius: 5px; background: #333; color: white; border: 1px solid #555;">
+                        <option value="Adoração">Adoração</option>
+                        <option value="Celebração">Celebração</option>
+                        <option value="Santa Ceia">Santa Ceia</option>
+                        <option value="Missão">Missão</option>
+                        <option value="Especial">Especial</option>
+                    </select>
+                </div>
+
                 <textarea id="texto-letra" class="input-padrao textarea-editor" placeholder="Digite ou cole a letra da música aqui..."></textarea>
+                
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                    <button id="btn-salvar-letra" class="btn-acao js-hover-target">Salvar Letra</button>
+                    <button id="btn-salvar-letra" class="btn-acao js-hover-target" style="background-color: #2ecc71;">Salvar Tudo</button>
                     <button id="btn-gerar-pdf" class="btn-acao js-hover-target" style="background-color: #eb4d4b;">Gerar PDF</button>
                     <button id="btn-limpar-editor" class="btn-acao js-hover-target" style="background-color: #7f8c8d;">Limpar Editor</button>
                 </div>
             </div>
             
-            <div class="upload-box">
-                <h3>📂 Upload de Documentos (PDF)</h3>
+            <div class="upload-box" style="margin-top: 20px;">
+                <h3>📂 Partituras e Documentos (PDF)</h3>
                 <input type="file" id="upload-pdf" accept=".pdf">
                 <button id="btn-enviar-pdf" class="btn-acao js-hover-target">Fazer Upload</button>
             </div>
         </section>
 
-        <section id="chat" class="painel painel-chat">
-            <h2>💬 Chat de Diálogo</h2>
-            <div id="chat-mensagens" class="chat-display" style="height: 300px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
-                <p class="mensagem-inicial">Bem-vindos ao chat! Comecem a conversar.</p>
-            </div>
-            <div class="chat-input-area" style="display: flex; gap: 10px;">
-                <input type="text" id="chat-input" class="input-padrao" placeholder="Digite sua mensagem..." style="flex-grow: 1;">
-                <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: auto; padding: 0 20px;">Enviar</button>
+        <section id="mural-ideias" class="painel painel-chat">
+            <h2>💡 Mural de Ideias</h2>
+            <p style="font-size: 0.8rem; color: #888; margin-bottom: 10px;">Sugestões de novas músicas e avisos para o grupo.</p>
+            
+            <div id="chat-mensagens" class="chat-display" style="height: 400px; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;">
+                </div>
+
+            <div class="chat-input-area" style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="chat-input" class="input-padrao" placeholder="Escreva uma ideia ou aviso...">
+                <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: 100%;">Postar no Mural</button>
+                <button id="btn-nova-ideia" class="btn-acao js-hover-target" style="background-color: #f1c40f; color: black;">💡 Sugerir Música Específica</button>
             </div>
         </section>
 
     </main>
 
     <footer class="rodape">
-        <p>&copy; 2025 Plataforma Colaborativa. Todos os direitos reservados.</p>
+        <p>&copy; 2025 Plataforma Colaborativa Santa Esmeralda. Todos os direitos reservados.</p>
     </footer>
 
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
 </body>
 </html>

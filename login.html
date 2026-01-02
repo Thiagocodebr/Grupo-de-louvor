@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Santa Esmeralda</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilos específicos para centralizar o formulário na tela */
+        body.body-login {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #0a0a0a; /* Fundo escuro padrão */
+            margin: 0;
+        }
+        .login-container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        .input-padrao {
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box; /* Garante que o padding não estoure a largura */
+        }
+        .alternar-link {
+            color: var(--cor-destaque, #00d1b2);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .alternar-link:hover {
+            text-decoration: underline;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body class="body-login">
+
+    <div class="login-container">
+        
+        <div id="form-login">
+            <h2 style="color: #00d1b2;">🔐 Acesso Interno</h2>
+            <input type="email" id="login-email" placeholder="Seu e-mail" class="input-padrao">
+            <input type="password" id="login-senha" placeholder="Sua senha" class="input-padrao">
+            
+            <button onclick="realizarLogin()" class="btn-acao js-hover-target" 
+                    style="background: #00d1b2; color: black; width: 100%; font-weight: bold; margin-top: 10px;">
+                ENTRAR
+            </button>
+            
+            <p style="color: #888; margin-top: 20px; font-size: 0.9rem;">
+                Não tem acesso? <span class="alternar-link" onclick="alternarFormularios()">Solicitar Cadastro</span>
+            </p>
+        </div>
+
+        <div id="form-cadastro" style="display: none;">
+            <h2 style="color: #2ecc71;">📝 Novo Membro</h2>
+            <input type="text" id="cad-nome" placeholder="Nome Completo" class="input-padrao">
+            <input type="email" id="cad-email" placeholder="E-mail da conta" class="input-padrao">
+            <input type="password" id="cad-senha" placeholder="Crie uma senha forte" class="input-padrao">
+            
+            <button onclick="finalizarCadastro()" class="btn-acao js-hover-target" 
+                    style="background: #2ecc71; color: white; width: 100%; font-weight: bold; margin-top: 10px;">
+                FINALIZAR CADASTRO
+            </button>
+            
+            <p style="color: #888; margin-top: 20px; font-size: 0.9rem;">
+                Já possui conta? <span class="alternar-link" onclick="alternarFormularios()" style="color: #2ecc71;">Fazer Login</span>
+            </p>
+        </div>
+
+    </div>
+
+    <script src="auth.js"></script>
+    
+    <script>
+        // Função para alternar entre Login e Cadastro
+        function alternarFormularios() {
+            const login = document.getElementById('form-login');
+            const cadastro = document.getElementById('form-cadastro');
+
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                cadastro.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                cadastro.style.display = 'block';
+            }
+        }
+
+        // Atalho: pressionar Enter para logar
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const loginAberto = document.getElementById('form-login').style.display !== 'none';
+                if (loginAberto) {
+                    realizarLogin();
+                } else {
+                    finalizarCadastro();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

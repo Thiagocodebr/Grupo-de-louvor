@@ -1,6 +1,8 @@
-// --- O PORTEIRO (Segurança de Acesso) ---
+/**
+ * --- O PORTEIRO (Segurança de Acesso) ---
+ * Deve vir antes de tudo para bloquear o carregamento se não houver login.
+ */
 if (!localStorage.getItem('usuarioLogado')) {
-    // Se não encontrar a "chave" no navegador, manda para o login
     window.location.href = 'login.html';
 }
 
@@ -12,13 +14,20 @@ const API_URL = window.location.hostname === '127.0.0.1' || window.location.host
 // Variáveis Globais de Estado
 let todasAsMusicas = []; 
 let listaTemporariaLinks = []; 
-let tituloMusicaAtual = ""; // Armazena o título da música selecionada
+let tituloMusicaAtual = ""; 
 
 /**
  * 2. INICIALIZAÇÃO DO SISTEMA
  */
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Sistema Santa Esmeralda v15 - Online");
+
+    // Exibir saudação personalizada
+    const nomeUsuario = localStorage.getItem('usuarioLogado');
+    const boasVindasElem = document.getElementById('boas-vindas');
+    if (boasVindasElem && nomeUsuario) {
+        boasVindasElem.innerText = `Olá, ${nomeUsuario}! 🙏`;
+    }
     
     // Cargas Iniciais
     carregarMusicas();
@@ -64,7 +73,6 @@ function renderizarLista(musicas) {
     const contador = document.getElementById('contador-musicas');
     
     if (contador) contador.innerText = musicas.length;
-    
     if (!listaDiv) return;
     
     if (!musicas.length) {
@@ -243,7 +251,7 @@ async function postarMensagem(texto) {
 }
 
 /**
- * 7. UTILITÁRIOS
+ * 7. UTILITÁRIOS E SAÍDA
  */
 function renderizarLinksNaGaveta(links) {
     const gaveta = document.getElementById('lista-links-visualizacao');
@@ -275,7 +283,8 @@ async function excluirMusica(id) {
     } catch (err) { console.error(err); }
 }
 
-function sair() {
-    localStorage.removeItem('usuarioLogado'); // Remove a permissão
-    window.location.href = 'login.html';      // Volta para a tela de login
-}
+// Tornando a função sair global para o botão HTML encontrar
+window.sair = function() {
+    localStorage.removeItem('usuarioLogado');
+    window.location.href = 'login.html';
+};

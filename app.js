@@ -13,29 +13,23 @@ let todasAsMusicas = [];
 let listaTemporariaLinks = []; 
 let tituloMusicaAtual = ""; 
 
+// Emojis expandidos
+const BANCO_EMOJIS = ['🙏','🎶','❤️','🙌','✨','🔥','😊','😂','😮','😢','👏','🎸','🎹','🎤','🌟','☁️'];
+
 /**
- * 2. INICIALIZAÇÃO (DOMContentLoaded)
+ * 2. INICIALIZAÇÃO E EVENTOS
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // Boas-vindas
     const nomeUsuario = localStorage.getItem('usuarioLogado');
     const boasVindasElem = document.getElementById('boas-vindas');
-    if (boasVindasElem && nomeUsuario) {
-        boasVindasElem.innerText = `Olá, ${nomeUsuario}! 🙏`;
-    }
+    if (boasVindasElem && nomeUsuario) boasVindasElem.innerText = `Olá, ${nomeUsuario}! 🙏`;
     
-    // Cargas Iniciais
     carregarMusicas();
     carregarMensagensEChat();
     
-    // Atualização em Tempo Real (Blindada)
-    setInterval(() => {
-        if (document.getElementById('chat-mensagens') || document.getElementById('mural-ideias-display')) {
-            carregarMensagensEChat();
-        }
-    }, 10000); 
+    setInterval(() => carregarMensagensEChat(), 10000); 
 
-    // Atribuição de Eventos (Uso de Optional Chaining ?. para não quebrar se o botão não existir)
+    // Listeners principais
     document.getElementById('btn-add-link')?.addEventListener('click', adicionarLinkTemporario);
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     document.getElementById('btn-gerar-pdf')?.addEventListener('click', gerarPDF);
@@ -43,100 +37,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-enviar-chat')?.addEventListener('click', enviarChat);
     document.getElementById('btn-nova-ideia')?.addEventListener('click', sugerirIdeia);
 
-    // Pesquisa
+    // Fechar seletores de emoji ao clicar fora
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.emoji-container')) {
+            document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
+        }
+    });
+
     document.getElementById('input-pesquisa')?.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
-        const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
-        renderizarLista(filtradas);
+        renderizarLista(todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo)));
     });
 });
 
 /**
- * 3. EDITOR DE TEXTO (Rich Text)
+ * 3. SISTEMA DE EMOJIS (SELETOR)
  */
-window.execCmd = function(command, value = null) {
-    const editor = document.getElementById('texto-letra');
-    if (editor) {
-        document.execCommand(command, false, value);
-        editor.focus();
+window.toggleEmojiPicker = function(id) {
+    const picker = document.getElementById(id);
+    if (!picker) return;
+    
+    if (picker.innerHTML === "") {
+        picker.innerHTML = BANCO_EMOJIS.map(emoji => 
+            `<span onclick="colarEmoji('${emoji}', '${id}')">${emoji}</span>`
+        ).join('');
     }
+    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex';
 };
 
-window.inserirEmojiEditor = function(emoji) {
-    const editor = document.getElementById('texto-letra');
-    if (editor) {
+window.colarEmoji = function(emoji, pickerId) {
+    if (pickerId === 'picker-editor') {
+        const editor = document.getElementById('texto-letra');
         editor.focus();
         document.execCommand('insertText', false, emoji);
-    }
-};
-
-window.adicionarEmojiChat = function(emoji) {
-    const input = document.getElementById('chat-input');
-    if (input) {
+    } else {
+        const input = document.getElementById('chat-input');
         input.value += emoji;
         input.focus();
     }
+    document.getElementById(pickerId).style.display = 'none';
 };
 
 /**
- * 4. GESTÃO DE MÚSICAS
- */
-async function carregarMusicas() {
-    const listaDiv = document.getElementById('lista-musicas');
-    try {
-        const res = await fetch(`${API_URL}/musics`);
-        if (!res.ok) throw new Error();
-        todasAsMusicas = await res.json();
-        renderizarLista(todasAsMusicas);
-    } catch (err) {
-        if (listaDiv) listaDiv.innerHTML = "<p style='color:#ffa502;'>Servidor em repouso... Carregando dados.</p>";
-    }
-}
-
-function renderizarLista(musicas) {
-    const listaDiv = document.getElementById('lista-musicas');
-    const contador = document.getElementById('contador-musicas');
-    
-    if (contador) contador.innerText = musicas.length;
-    if (!listaDiv) return;
-    
-    if (musicas.length === 0) {
-        listaDiv.innerHTML = "<p style='color:#666; padding:10px;'>Nenhuma música encontrada.</p>";
-        return;
-    }
-
-    listaDiv.innerHTML = musicas.map(m => `
-        <div class="item-musica" id="musica-${m._id}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333;">
-            <div onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow: 1;">
-                <span style="font-size: 0.6rem; background: #00d1b2; color: #000; padding: 2px 5px; border-radius: 3px; text-transform: uppercase; font-weight:bold;">
-                    ${m.categoria || 'Geral'}
-                </span><br>
-                <strong style="color: #fff">${m.titulo}</strong>
-            </div>
-            <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color: #ff4d4d; cursor:pointer; font-size:1.2rem;">&times;</button>
-        </div>
-    `).join('');
-}
-
-window.exibirLetra = (id) => {
-    const musica = todasAsMusicas.find(m => m._id === id);
-    const editor = document.getElementById('texto-letra');
-    const selectCat = document.getElementById('select-categoria');
-
-    if (musica && editor) {
-        tituloMusicaAtual = musica.titulo; 
-        editor.innerHTML = musica.letra || "";
-        if (selectCat) selectCat.value = musica.categoria || "Adoração";
-        renderizarLinksNaGaveta(musica.links || []);
-        
-        document.querySelectorAll('.item-musica').forEach(i => i.style.background = "transparent");
-        const item = document.getElementById(`musica-${id}`);
-        if (item) item.style.background = "rgba(0, 209, 178, 0.1)";
-    }
-};
-
-/**
- * 5. COMUNICAÇÃO (CHAT E MURAL)
+ * 4. COMUNICAÇÃO (CHAT E MURAL)
  */
 async function carregarMensagensEChat() {
     const chat = document.getElementById('chat-mensagens');
@@ -144,7 +87,6 @@ async function carregarMensagensEChat() {
 
     try {
         const res = await fetch(`${API_URL}/messages`);
-        if (!res.ok) return;
         const mensagens = await res.json();
         
         if (chat) {
@@ -154,13 +96,26 @@ async function carregarMensagensEChat() {
         }
 
         if (mural) {
-            mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse()
-                .map(m => `<div style="padding:8px; border-bottom:1px solid #333; font-size:0.9rem;">${m.texto}<br><small style="color:#f1c40f;">Por: ${m.usuario || 'Membro'}</small></div>`).join('');
+            // .slice(0, 10) mantém apenas as 10 mensagens mais recentes visíveis
+            mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse().slice(0, 10)
+                .map(m => `
+                    <div class="card-ideia" style="position:relative; padding:10px; border-bottom:1px solid #333; background:rgba(255,255,255,0.03); margin-bottom:5px; border-radius:5px;">
+                        <button onclick="excluirItemMural('${m._id}')" style="position:absolute; right:8px; top:8px; background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:1rem;">&times;</button>
+                        <span style="display:block; padding-right:20px;">${m.texto}</span>
+                        <small style="color:#f1c40f;">Enviado por: ${m.usuario || 'Membro'}</small>
+                    </div>
+                `).join('');
         }
-    } catch (err) {
-        console.warn("Falha ao atualizar chat/mural.");
-    }
+    } catch (err) { console.warn("Erro ao carregar mensagens."); }
 }
+
+window.excluirItemMural = async function(id) {
+    if (!confirm("Remover esta ideia do mural?")) return;
+    try {
+        const res = await fetch(`${API_URL}/messages/${id}`, { method: 'DELETE' });
+        if (res.ok) carregarMensagensEChat();
+    } catch (e) { alert("Erro ao excluir."); }
+};
 
 async function enviarChat() {
     const input = document.getElementById('chat-input');
@@ -170,64 +125,86 @@ async function enviarChat() {
     await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            texto, 
-            usuario: localStorage.getItem('usuarioLogado') || "Membro" 
-        })
+        body: JSON.stringify({ texto, usuario: localStorage.getItem('usuarioLogado') })
     });
     input.value = '';
     carregarMensagensEChat();
 }
 
 /**
- * 6. SALVAMENTO E PDF
+ * 5. GESTÃO DE MÚSICAS E EDITOR
  */
-async function salvarLetra() {
-    const editor = document.getElementById('texto-letra');
-    const selectCat = document.getElementById('select-categoria');
-    if (!editor) return;
+async function carregarMusicas() {
+    const listaDiv = document.getElementById('lista-musicas');
+    try {
+        const res = await fetch(`${API_URL}/musics`);
+        todasAsMusicas = await res.json();
+        renderizarLista(todasAsMusicas);
+    } catch (err) {
+        if (listaDiv) listaDiv.innerHTML = "<p>Servidor carregando...</p>";
+    }
+}
 
+function renderizarLista(musicas) {
+    const listaDiv = document.getElementById('lista-musicas');
+    if (!listaDiv) return;
+    document.getElementById('contador-musicas').innerText = musicas.length;
+    
+    listaDiv.innerHTML = musicas.map(m => `
+        <div class="item-musica" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333;">
+            <div onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow:1;">
+                <span style="font-size: 0.6rem; background: #00d1b2; color: #000; padding: 2px 5px; border-radius: 3px; font-weight:bold;">${m.categoria || 'Geral'}</span><br>
+                <strong style="color: #fff">${m.titulo}</strong>
+            </div>
+            <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color: #ff4d4d; cursor:pointer; font-size:1.2rem;">&times;</button>
+        </div>
+    `).join('');
+}
+
+window.exibirLetra = (id) => {
+    const musica = todasAsMusicas.find(m => m._id === id);
+    if (musica) {
+        tituloMusicaAtual = musica.titulo; 
+        document.getElementById('texto-letra').innerHTML = musica.letra || "";
+        document.getElementById('select-categoria').value = musica.categoria || "Adoração";
+        renderizarLinksNaGaveta(musica.links || []);
+    }
+};
+
+window.execCmd = (command, value = null) => {
+    document.execCommand(command, false, value);
+    document.getElementById('texto-letra').focus();
+};
+
+async function salvarLetra() {
     const titulo = prompt("Título da música:", tituloMusicaAtual);
     if (!titulo) return;
-
     const dados = {
         titulo,
-        categoria: selectCat?.value || "Adoração",
-        letra: editor.innerHTML,
+        categoria: document.getElementById('select-categoria').value,
+        letra: document.getElementById('texto-letra').innerHTML,
         links: listaTemporariaLinks
     };
-
-    try {
-        const res = await fetch(`${API_URL}/musics`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        if (res.ok) {
-            alert("Música salva!");
-            limparEditor();
-            carregarMusicas();
-        }
-    } catch (err) { alert("Erro ao salvar."); }
+    await fetch(`${API_URL}/musics`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+    });
+    alert("Salvo!");
+    carregarMusicas();
 }
 
 async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const editor = document.getElementById('texto-letra');
-    if (!editor) return;
-
-    const letraLimpa = editor.innerText;
-    doc.setFont("helvetica", "bold");
-    doc.text(tituloMusicaAtual || "Nova Música", 10, 20);
-    doc.setFont("helvetica", "normal");
+    const letraLimpa = document.getElementById('texto-letra').innerText;
+    doc.setFontSize(16);
+    doc.text(tituloMusicaAtual || "Música", 10, 20);
+    doc.setFontSize(12);
     doc.text(doc.splitTextToSize(letraLimpa, 180), 10, 30);
-    doc.save(`${tituloMusicaAtual || 'musica'}.pdf`);
+    doc.save(`${tituloMusicaAtual || 'letra'}.pdf`);
 }
 
-/**
- * 7. UTILITÁRIOS
- */
 function adicionarLinkTemporario() {
     const input = document.getElementById('link-referencia');
     if (input?.value.trim()) {
@@ -238,56 +215,43 @@ function adicionarLinkTemporario() {
 }
 
 function renderizarLinksTemporarios() {
-    const div = document.getElementById('lista-links-dinamica');
-    if (!div) return;
-    div.innerHTML = listaTemporariaLinks.map((link, index) => `
-        <div style="display:flex; justify-content:space-between; background:rgba(0,209,178,0.1); padding:8px; border-radius:4px; font-size:0.8rem; border:1px solid #00d1b2; margin-bottom:5px;">
-            <span style="color:#fff; overflow:hidden; text-overflow:ellipsis;">${link}</span>
-            <button onclick="listaTemporariaLinks.splice(${index},1); renderizarLinksTemporarios();" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">✕</button>
+    document.getElementById('lista-links-dinamica').innerHTML = listaTemporariaLinks.map((l, i) => `
+        <div style="display:flex; justify-content:space-between; background:#222; padding:5px; margin-top:5px; border-radius:4px;">
+            <span style="font-size:0.8rem; color:#00d1b2; overflow:hidden;">${l}</span>
+            <button onclick="listaTemporariaLinks.splice(${i},1); renderizarLinksTemporarios();" style="border:none; background:none; color:red; cursor:pointer;">&times;</button>
         </div>
     `).join('');
 }
 
 function renderizarLinksNaGaveta(links) {
-    const gaveta = document.getElementById('lista-links-visualizacao');
-    if (!gaveta) return;
-    gaveta.innerHTML = (links && links.length > 0)
-        ? links.map(link => `<a href="${link}" target="_blank" style="color:#00d1b2; margin-right:10px; font-size:0.8rem;">🔗 Link</a>`).join('')
-        : '<span style="color:#666; font-size:0.8rem;">Sem links.</span>';
+    document.getElementById('lista-links-visualizacao').innerHTML = links.map(l => `<a href="${l}" target="_blank" style="color:#00d1b2; font-size:0.8rem;">🔗 Link</a>`).join('');
 }
 
 function limparEditor() {
-    const editor = document.getElementById('texto-letra');
-    const linksDiv = document.getElementById('lista-links-dinamica');
-    if (editor) editor.innerHTML = "";
-    if (linksDiv) linksDiv.innerHTML = "";
+    document.getElementById('texto-letra').innerHTML = "";
     listaTemporariaLinks = [];
     tituloMusicaAtual = "";
 }
 
 async function excluirMusica(id) {
-    if (!confirm("Excluir música permanentemente?")) return;
-    try {
+    if (confirm("Excluir música?")) {
         await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
         carregarMusicas();
-    } catch (e) { alert("Erro ao excluir."); }
+    }
 }
 
 async function sugerirIdeia() {
-    const texto = prompt("Sua sugestão de música ou ideia:");
+    const texto = prompt("Sua ideia:");
     if (!texto) return;
     await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            texto: `💡 IDEIA: ${texto}`, 
-            usuario: localStorage.getItem('usuarioLogado') || "Membro" 
-        })
+        body: JSON.stringify({ texto: `💡 IDEIA: ${texto}`, usuario: localStorage.getItem('usuarioLogado') })
     });
     carregarMensagensEChat();
 }
 
-window.sair = function() {
+window.sair = () => {
     localStorage.removeItem('usuarioLogado');
     window.location.href = 'login.html';
 };

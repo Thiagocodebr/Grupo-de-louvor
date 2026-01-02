@@ -1,3 +1,9 @@
+// --- O PORTEIRO (Segurança de Acesso) ---
+if (!localStorage.getItem('usuarioLogado')) {
+    // Se não encontrar a "chave" no navegador, manda para o login
+    window.location.href = 'login.html';
+}
+
 // 1. CONFIGURAÇÃO DA URL (Produção vs Desenvolvimento)
 const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 

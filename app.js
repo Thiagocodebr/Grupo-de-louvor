@@ -266,4 +266,8 @@ async function excluirMusica(id) {
         const res = await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
         if (res.ok) carregarMusicas();
     } catch (err) { console.error(err); }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> b43a564e185e58cfaac5de8fe6f3a990f3241d48

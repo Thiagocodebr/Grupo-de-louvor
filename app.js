@@ -274,3 +274,8 @@ async function excluirMusica(id) {
         if (res.ok) carregarMusicas();
     } catch (err) { console.error(err); }
 }
+
+function sair() {
+    localStorage.removeItem('usuarioLogado'); // Remove a permissão
+    window.location.href = 'login.html';      // Volta para a tela de login
+}

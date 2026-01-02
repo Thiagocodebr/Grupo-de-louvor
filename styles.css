@@ -1,4 +1,4 @@
-/* RESET BÁSICO */
+/* 1. CONFIGURAÇÕES GERAIS */
 * {
     margin: 0;
     padding: 0;
@@ -6,339 +6,126 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* VARIÁVEIS DE CORES */
-:root {
-    --cor-fundo: #1e1e2d;
-    --cor-painel: #27293d;
-    --cor-destaque: #65b891; /* Verde/Ciano para destaque */
-    --cor-texto: #ffffff;
-    --cor-suave: #a9a9b9;
-    --cor-borda: #44485f;
-    --cor-botoes: #65b891;
-    --cor-botoes-hover: #4e9174;
-}
-
 body {
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
+    background-color: #0f0f13;
+    color: #ffffff;
     line-height: 1.6;
-    padding: 20px;
 }
 
-/* ESTRUTURA PRINCIPAL */
-.cabecalho {
-    background-color: var(--cor-painel);
-    padding: 20px 40px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.titulo-principal {
-    color: var(--cor-destaque);
-    font-size: 1.8rem;
-}
-
-.navegacao a {
-    color: var(--cor-suave);
-    text-decoration: none;
-    margin-left: 25px;
-    font-weight: 500;
-    transition: color 0.3s;
-}
-
-.navegacao a:hover {
-    color: var(--cor-destaque);
-}
-
+/* 2. LAYOUT EM GRID (O SEGREDO DAS COLUNAS) */
 .conteudo-principal {
     display: grid;
-    /* Divide em 3 colunas, sendo a do meio ligeiramente maior */
-    grid-template-columns: 1fr 1.5fr 1fr; 
+    grid-template-columns: 1fr 2fr 1fr; /* 3 colunas: Repertório, Editor (maior), Comunidade */
     gap: 20px;
+    padding: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
-/* PAINÉIS */
+/* Responsividade: Celulares e Tablets pequenos */
+@media (max-width: 1100px) {
+    .conteudo-principal {
+        grid-template-columns: 1fr; /* Empilha tudo em uma coluna só */
+    }
+}
+
+/* 3. PAINÉIS (CARDS) */
 .painel {
-    background-color: var(--cor-painel);
-    padding: 25px;
-    border-radius: 8px;
-    border: 1px solid var(--cor-borda);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    min-height: 400px;
+    background: #1e1e24;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    height: fit-content;
 }
 
-.painel h2 {
-    color: var(--cor-destaque);
-    margin-bottom: 20px;
-    border-bottom: 1px solid var(--cor-borda);
-    padding-bottom: 10px;
-    font-size: 1.5rem;
-}
-
-/* CAMPOS DE INPUT E TEXTAREA */
-.input-padrao, .textarea-editor {
-    width: 100%;
-    padding: 12px;
+h2 {
+    color: #00d1b2;
+    font-size: 1.2rem;
     margin-bottom: 15px;
-    border: 1px solid var(--cor-borda);
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
-    border-radius: 4px;
-    resize: vertical;
-    transition: border-color 0.3s;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
 }
 
-.input-padrao:focus, .textarea-editor:focus {
-    border-color: var(--cor-destaque);
-    outline: none;
+/* 4. ELEMENTOS DE INTERFACE */
+.input-padrao, select, input[type="text"], input[type="url"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #121216;
+    color: white;
+    margin-bottom: 10px;
 }
 
-.textarea-editor {
-    min-height: 150px;
-}
-
-/* BOTÕES (AÇÕES) */
 .btn-acao {
-    display: inline-block;
-    padding: 10px 18px;
-    background-color: var(--cor-botoes);
-    color: var(--cor-fundo); /* Texto escuro no botão claro */
+    background: #00d1b2;
+    color: #000;
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    padding: 10px 20px;
+    border-radius: 6px;
     font-weight: bold;
-    text-align: center;
-    transition: background-color 0.3s, transform 0.1s;
-    user-select: none; /* Evita seleção de texto ao passar o mouse */
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 .btn-acao:hover {
-    background-color: var(--cor-botoes-hover);
-    transform: translateY(-1px); /* Pequeno efeito 3D */
-}
-
-/* SEÇÃO CHAT */
-.chat-display {
-    height: 300px;
-    border: 1px solid var(--cor-borda);
-    padding: 10px;
-    margin-bottom: 15px;
-    overflow-y: auto; /* Permite scroll para mensagens antigas */
-    background-color: var(--cor-fundo);
-    border-radius: 4px;
-}
-
-.chat-input-area {
-    display: flex;
-}
-
-#chat-input {
-    flex-grow: 1;
-    margin-right: 10px;
-    margin-bottom: 0;
-}
-
-/* SEÇÃO LINKS E UPLOAD */
-.referencias-box {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px dashed var(--cor-borda);
-}
-
-.referencias-box h3 {
-    font-size: 1rem;
-    color: var(--cor-suave);
-    margin-bottom: 10px;
-}
-
-/* ESTILIZAÇÃO PARA O TRUQUE DE UPLOAD DE ARQUIVO */
-/* O rótulo customizado para "Escolher Arquivo" */
-.custom-file-label {
-    margin-right: 10px;
-}
-
-.file-status {
-    color: var(--cor-suave);
-    font-size: 0.9rem;
-    margin-left: 5px;
-}
-
-/* RODAPÉ */
-.rodape {
-    text-align: center;
-    padding-top: 20px;
-    margin-top: 20px;
-    border-top: 1px solid var(--cor-borda);
-    color: var(--cor-suave);
-    font-size: 0.9rem;
-}
-
-/* RESPONSIVIDADE (Para telas menores) */
-@media (max-width: 1200px) {
-    .conteudo-principal {
-        /* Muda para duas colunas em telas menores */
-        grid-template-columns: 1fr 1fr;
-    }
-    .painel-letras {
-        /* O editor de letras ocupa duas colunas */
-        grid-column: span 2; 
-    }
-}
-
-@media (max-width: 768px) {
-    .conteudo-principal {
-        /* Em telas de celular, vira uma coluna única */
-        grid-template-columns: 1fr;
-    }
-    .painel-letras {
-        grid-column: span 1; 
-    }
-}
-
-/* Estilo para a música selecionada na lista */
-.item-musica.selecionada {
-    border-left: 5px solid #65b891 !important; /* Borda lateral verde */
-    background-color: rgba(101, 184, 145, 0.1) !important; /* Fundo suave */
-    transition: all 0.3s ease;
-}
-
-/* Efeito de destaque para a música selecionada */
-.item-musica.selecionada {
-    border-left: 6px solid #65b891 !important; /* Borda verde grossa na esquerda */
-    background-color: rgba(101, 184, 145, 0.15) !important; /* Fundo levemente esverdeado */
-    transition: all 0.2s ease-in-out;
-}
-
-.item-musica.selecionada {
-    border-left: 6px solid #65b891 !important;
-    background-color: rgba(101, 184, 145, 0.1) !important;
-    transform: translateX(5px);
-    transition: all 0.3s ease;
-}
-
-/* --- GAVETA DE LINKS (TOPO DO EDITOR) --- */
-#lista-links-visualizacao a {
-    transition: all 0.3s ease;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-#lista-links-visualizacao a:hover {
+    background: #00b89c;
     transform: translateY(-2px);
-    filter: brightness(1.2);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
-/* Cores Oficiais para YouTube e Spotify */
-#lista-links-visualizacao a[href*="youtube"] { background-color: #c4302b !important; }
-#lista-links-visualizacao a[href*="spotify"] { background-color: #1DB954 !important; }
-
-/* --- MURAL DE IDEIAS (CARDS DESTACADOS) --- */
-#mural-ideias-display div {
-    background: linear-gradient(145deg, rgba(241, 196, 15, 0.1), rgba(241, 196, 15, 0.02)) !important;
-    border-left: 4px solid #f1c40f !important;
-    padding: 12px !important;
-    margin-bottom: 12px;
-    border-radius: 4px 8px 8px 4px;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-    animation: fadeIn 0.5s ease-out;
+/* 5. LISTA DE MÚSICAS */
+.lista-itens {
+    margin-top: 10px;
 }
 
-#mural-ideias-display p {
-    color: #fff;
-    font-weight: 500;
-    line-height: 1.4;
+.item-musica {
+    transition: 0.2s;
+    border-radius: 6px;
+    margin-bottom: 5px;
 }
 
-/* --- CHAT EM TEMPO REAL (ESTILO BALÃO) --- */
-#chat-mensagens div {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 10px 14px;
-    border-radius: 15px 15px 15px 2px;
-    margin-bottom: 10px;
-    max-width: 90%;
-    border: 1px solid rgba(0, 209, 178, 0.1);
-    position: relative;
+.item-musica:hover {
+    background: rgba(0, 209, 178, 0.1) !important;
 }
 
-#chat-mensagens strong {
-    display: block;
-    margin-bottom: 3px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+/* 6. CHAT E MURAL */
+#chat-mensagens {
+    scrollbar-width: thin;
+    scrollbar-color: #333 #1a1a1a;
 }
 
-/* --- SCROLLBARS PERSONALIZADAS (Para ficar elegante) --- */
-#mural-ideias-display::-webkit-scrollbar,
-#chat-mensagens::-webkit-scrollbar,
-.lista-itens::-webkit-scrollbar {
+#chat-mensagens::-webkit-scrollbar {
     width: 6px;
 }
 
-#mural-ideias-display::-webkit-scrollbar-thumb,
-#chat-mensagens::-webkit-scrollbar-thumb,
-.lista-itens::-webkit-scrollbar-thumb {
-    background: #444;
+#chat-mensagens::-webkit-scrollbar-thumb {
+    background: #333;
     border-radius: 10px;
 }
 
-#mural-ideias-display::-webkit-scrollbar-thumb:hover,
-#chat-mensagens::-webkit-scrollbar-thumb:hover {
-    background: var(--cor-destaque);
+/* 7. CABEÇALHO */
+.cabecalho {
+    text-align: center;
+    padding: 20px;
+    background: #1e1e24;
+    border-bottom: 1px solid #00d1b2;
 }
 
-/* Animação para novas mensagens */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-<<<<<<< HEAD
-
-.body-login {
+.navegacao {
+    margin-top: 15px;
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #0a0a0a; /* Fundo escuro igual ao resto do site */
+    gap: 20px;
 }
 
-.login-container {
-    background: #1a1a1a;
-    padding: 40px;
-    border-radius: 12px;
-    border: 1px solid #333;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
-.login-container h2 {
-    margin-bottom: 20px;
-    color: #00d1b2;
-}
-
-.login-container p {
-    margin-top: 15px;
-    font-size: 0.9rem;
+.nav-link {
     color: #888;
-}
-
-.login-container a {
-    color: #00d1b2;
     text-decoration: none;
     font-weight: bold;
+    font-size: 0.9rem;
 }
-=======
->>>>>>> b43a564e185e58cfaac5de8fe6f3a990f3241d48
 
+.nav-link:hover {
+    color: #00d1b2;
+}

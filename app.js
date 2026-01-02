@@ -199,7 +199,7 @@ async function excluirMusica(id) {
 }
 
 /**
- * 7. CHAT E MURAL
+ * 7. CHAT E MURAL (ATUALIZADO COM IDENTIFICAÇÃO DE USUÁRIO)
  */
 async function carregarMensagensEChat() {
     try {
@@ -209,44 +209,62 @@ async function carregarMensagensEChat() {
         const mural = document.getElementById('mural-ideias-display');
         if (mural) {
             const ideias = mensagens.filter(m => m.texto.includes("💡"));
-            mural.innerHTML = ideias.reverse().map(m => `<div style="padding:5px; border-bottom:1px solid #333;">${m.texto}</div>`).join('');
+            mural.innerHTML = ideias.reverse().map(m => {
+                const autor = m.usuario ? `<br><small style="color:#f1c40f;">Sugerido por: ${m.usuario}</small>` : "";
+                return `<div style="padding:8px; border-bottom:1px solid #333; font-size: 0.9rem;">${m.texto}${autor}</div>`;
+            }).join('');
         }
 
         const chat = document.getElementById('chat-mensagens');
         if (chat) {
             const conversas = mensagens.filter(m => !m.texto.includes("💡"));
-            chat.innerHTML = conversas.map(m => `<p><b style="color:#00d1b2">Membro:</b> ${m.texto}</p>`).join('');
+            chat.innerHTML = conversas.map(m => {
+                const autor = m.usuario ? m.usuario : "Membro";
+                return `<p style="margin-bottom: 8px;"><b style="color:#00d1b2">${autor}:</b> ${m.texto}</p>`;
+            }).join('');
             chat.scrollTop = chat.scrollHeight;
         }
-    } catch (err) { }
+    } catch (err) { console.error("Erro ao carregar mensagens:", err); }
 }
 
 async function enviarChat() {
     const input = document.getElementById('chat-input');
     const texto = input.value.trim();
+    const nomeUsuario = localStorage.getItem('usuarioLogado') || "Membro";
+
     if (!texto) return;
+
     try {
         await fetch(`${API_URL}/messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto })
+            body: JSON.stringify({ 
+                texto: texto,
+                usuario: nomeUsuario 
+            })
         });
         input.value = '';
         carregarMensagensEChat();
-    } catch (err) { }
+    } catch (err) { console.error("Erro ao enviar chat:", err); }
 }
 
 async function sugerirIdeia() {
     const texto = prompt("Sua sugestão:");
+    const nomeUsuario = localStorage.getItem('usuarioLogado') || "Membro";
+
     if (!texto) return;
+
     try {
         await fetch(`${API_URL}/messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto: `💡 IDEIA: ${texto}` })
+            body: JSON.stringify({ 
+                texto: `💡 IDEIA: ${texto}`,
+                usuario: nomeUsuario
+            })
         });
         carregarMensagensEChat();
-    } catch (err) { }
+    } catch (err) { console.error("Erro ao enviar ideia:", err); }
 }
 
 window.sair = function() {

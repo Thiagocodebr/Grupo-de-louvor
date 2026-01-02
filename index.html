@@ -7,48 +7,20 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Estilos rápidos para o Editor e Toolbar */
         .toolbar {
-            background: #222;
-            padding: 8px;
-            border: 1px solid #444;
-            border-bottom: none;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            border-radius: 8px 8px 0 0;
-            align-items: center;
-        }
-        .toolbar button {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            padding: 5px 8px;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            transition: 0.2s;
-        }
-        .toolbar button:hover { background: #444; border-color: #00d1b2; }
-        .toolbar select, .toolbar input[type="color"] {
-            background: #333;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 4px;
-            cursor: pointer;
-            height: 28px;
+            background: #222; padding: 10px; border: 1px solid #444;
+            border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap;
+            border-radius: 8px 8px 0 0; align-items: center;
         }
         .editor-rich {
-            min-height: 400px;
-            background: #1a1a1a;
-            color: white;
-            padding: 15px;
-            border: 1px solid #444;
-            border-radius: 0 0 8px 8px;
-            outline: none;
-            overflow-y: auto;
-            line-height: 1.6;
+            min-height: 400px; background: #1a1a1a; color: white;
+            padding: 15px; border: 1px solid #444; border-radius: 0 0 8px 8px;
+            outline: none; overflow-y: auto; line-height: 1.6;
         }
-        .emoji-btn { font-size: 1.1rem !important; background: none !important; border: none !important; }
+        .emoji-btn { font-size: 1.2rem; cursor: pointer; background: none; border: none; transition: 0.2s; }
+        .emoji-btn:hover { transform: scale(1.2); }
+        .btn-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -58,64 +30,93 @@
     <header class="cabecalho">
         <div class="user-bar" style="display: flex; justify-content: flex-end; align-items: center; gap: 15px; padding: 10px; background: rgba(0,0,0,0.2);">
             <span id="boas-vindas" style="color: #00d1b2; font-weight: bold; font-size: 0.9rem;"></span>
-            <button onclick="sair()" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">Sair 🚪</button>
+            <button onclick="sair()" style="background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold;">Sair 🚪</button>
         </div>
         <h1 class="titulo-principal">🎶 Grupo de Louvor Santa Esmeralda</h1>
         <nav class="navegacao">
             <a href="#editor-letras" class="nav-link js-hover-target">Letras</a>
             <a href="#repertorio" class="nav-link js-hover-target">Repertório</a>
-            <a href="#upload-pdf" class="nav-link js-hover-target">Documentos</a>
+            <a href="#comunidade" class="nav-link js-hover-target">Comunidade</a>
         </nav>
     </header>
 
     <main class="conteudo-principal">
-        <section id="repertorio" class="painel painel-ideias">
+        
+        <section id="repertorio" class="painel">
             <h2>✨ Repertório e Cadastro</h2>
-            <div style="padding: 10px 10px 0 10px; font-size: 0.9rem; color: #888;">
+            <div style="padding: 10px; font-size: 0.8rem; color: #888;">
                 Músicas no Banco: <span id="contador-musicas" style="color: #00d1b2; font-weight: bold;">0</span>
             </div>
             <div style="padding: 10px;">
                 <input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;">
             </div>
-            <div id="lista-musicas" class="lista-itens"><p>Carregando...</p></div>
+            <div id="lista-musicas" class="lista-itens" style="max-height: 400px; overflow-y: auto;">
+                <p>Carregando...</p>
+            </div>
+
             <div class="referencias-box" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
                 <h3>🔗 Referência Temporária</h3>
                 <div style="display: flex; gap: 8px;">
-                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link YouTube..." style="flex-grow: 1;">
-                    <button id="btn-add-link" class="btn-acao">+</button>
+                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link YouTube/Spotify..." style="flex-grow: 1;">
+                    <button id="btn-add-link" class="btn-acao" style="padding: 0 15px;">+</button>
                 </div>
-                <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
+                <div id="lista-links-dinamica" style="margin-top: 10px;"></div>
             </div>
         </section>
 
-        <section id="editor-letras" class="painel painel-letras">
+        <section id="editor-letras" class="painel">
             <h2>✍️ Editor de Letras</h2>
             <div id="area-links-salvos" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444;">
-                <small style="color: #00d1b2; font-weight: bold;">📺 Referências:</small>
+                <small style="color: #00d1b2; font-weight: bold;">📺 Referências Salvas:</small>
                 <div id="lista-links-visualizacao" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
             </div>
             
-            <div class="editor-area">
-                <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <label>Categoria:</label>
-                    <select id="select-categoria">
-                        <option value="Adoração">Adoração</option>
-                        <option value="Celebração">Celebração</option>
-                        <option value="Santa Ceia">Santa Ceia</option>
-                    </select>
-                </div>
+            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                <label>Categoria:</label>
+                <select id="select-categoria" style="background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px;">
+                    <option value="Adoração">Adoração</option>
+                    <option value="Celebração">Celebração</option>
+                    <option value="Santa Ceia">Santa Ceia</option>
+                </select>
+            </div>
 
-                <div class="toolbar">
-                    <button onclick="execCmd('bold')"><b>B</b></button>
-                    <button onclick="execCmd('italic')"><i>I</i></button>
-                    <button onclick="execCmd('underline')"><u>U</u></button>
-                    <input type="color" oninput="execCmd('foreColor', this.value)">
-                    <button class="emoji-btn" onclick="inserirEmojiEditor('🙏')">🙏</button>
-                    <button class="emoji-btn" onclick="inserirEmojiEditor('🎶')">🎶</button>
-                    <button class="emoji-btn" onclick="inserirEmojiEditor('❤️')">❤️</button>
-                    <small style="color:#666; font-size:0.6rem; margin-left:auto;">Win + .</small>
+            <div class="toolbar">
+                <button type="button" onclick="execCmd('bold')"><b>B</b></button>
+                <button type="button" onclick="execCmd('italic')"><i>I</i></button>
+                <button type="button" onclick="execCmd('underline')"><u>U</u></button>
+                <input type="color" oninput="execCmd('foreColor', this.value)" title="Cor da Letra">
+                <button type="button" class="emoji-btn" onclick="inserirEmojiEditor('🙏')">🙏</button>
+                <button type="button" class="emoji-btn" onclick="inserirEmojiEditor('🎶')">🎶</button>
+                <button type="button" class="emoji-btn" onclick="inserirEmojiEditor('❤️')">❤️</button>
+                <small style="color:#666; font-size:0.6rem; margin-left:auto;">Dica: Win + .</small>
+            </div>
+            <div id="texto-letra" class="editor-rich" contenteditable="true"></div>
+            
+            <div class="btn-container">
+                <button id="btn-salvar-letra" class="btn-acao">Salvar Tudo</button>
+                <button id="btn-gerar-pdf" class="btn-acao" style="background: #e67e22;">Gerar PDF</button>
+                <button id="btn-limpar-editor" class="btn-acao" style="background: #7f8c8d;">Limpar Editor</button>
+            </div>
+        </section>
+
+        <section id="comunidade" class="painel">
+            <h2>💬 Chat em Tempo Real</h2>
+            <div id="chat-mensagens" style="height: 300px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem;">
                 </div>
-                <div id="texto-letra" class="editor-rich" contenteditable="true"></div>
-                
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                    <button id="btn-salvar-letra" class="btn-acao" style="
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="chat-input" placeholder="Conversar..." style="flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;">
+                <button type="button" class="emoji-btn" onclick="adicionarEmojiChat('🙏')">🙏</button>
+                <button id="btn-enviar-chat" class="btn-acao">Enviar</button>
+            </div>
+
+            <h2 style="margin-top: 30px;">💡 Mural de Ideias</h2>
+            <div id="mural-ideias-display" style="background: rgba(241, 196, 15, 0.05); border: 1px dashed #f1c40f; border-radius: 8px; min-height: 150px; padding: 10px; overflow-y: auto; max-height: 300px;">
+                </div>
+            <button id="btn-nova-ideia" class="btn-acao" style="width: 100%; margin-top: 10px; background: #f1c40f; color: #000; font-weight: bold;">Sugerir Nova Ideia</button>
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

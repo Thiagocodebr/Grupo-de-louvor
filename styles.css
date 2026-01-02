@@ -302,3 +302,43 @@ body {
     from { opacity: 0; transform: translateX(10px); }
     to { opacity: 1; transform: translateX(0); }
 }
+<<<<<<< HEAD
+
+.body-login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #0a0a0a; /* Fundo escuro igual ao resto do site */
+}
+
+.login-container {
+    background: #1a1a1a;
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: #00d1b2;
+}
+
+.login-container p {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.login-container a {
+    color: #00d1b2;
+    text-decoration: none;
+    font-weight: bold;
+}
+=======
+>>>>>>> b43a564e185e58cfaac5de8fe6f3a990f3241d48
+

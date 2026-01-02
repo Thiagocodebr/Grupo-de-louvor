@@ -1,5 +1,5 @@
 /**
- * 1. PORTEIRO DE SEGURANÇA E CONFIGURAÇÃO
+ * 1. CONFIGURAÇÕES E SEGURANÇA
  */
 if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'login.html';
@@ -14,20 +14,28 @@ let listaTemporariaLinks = [];
 let tituloMusicaAtual = ""; 
 
 /**
- * 2. INICIALIZAÇÃO DO SISTEMA
+ * 2. INICIALIZAÇÃO (DOMContentLoaded)
  */
 document.addEventListener('DOMContentLoaded', () => {
+    // Boas-vindas
     const nomeUsuario = localStorage.getItem('usuarioLogado');
     const boasVindasElem = document.getElementById('boas-vindas');
     if (boasVindasElem && nomeUsuario) {
         boasVindasElem.innerText = `Olá, ${nomeUsuario}! 🙏`;
     }
     
+    // Cargas Iniciais
     carregarMusicas();
     carregarMensagensEChat();
-    setInterval(carregarMensagensEChat, 10000); 
+    
+    // Atualização em Tempo Real (Blindada)
+    setInterval(() => {
+        if (document.getElementById('chat-mensagens') || document.getElementById('mural-ideias-display')) {
+            carregarMensagensEChat();
+        }
+    }, 10000); 
 
-    // Listeners de Botões
+    // Atribuição de Eventos (Uso de Optional Chaining ?. para não quebrar se o botão não existir)
     document.getElementById('btn-add-link')?.addEventListener('click', adicionarLinkTemporario);
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarLetra);
     document.getElementById('btn-gerar-pdf')?.addEventListener('click', gerarPDF);
@@ -35,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-enviar-chat')?.addEventListener('click', enviarChat);
     document.getElementById('btn-nova-ideia')?.addEventListener('click', sugerirIdeia);
 
-    // Pesquisa Dinâmica
+    // Pesquisa
     document.getElementById('input-pesquisa')?.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
         const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
@@ -44,45 +52,59 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * 3. FERRAMENTAS DO EDITOR (Rich Text & Emojis)
+ * 3. EDITOR DE TEXTO (Rich Text)
  */
 window.execCmd = function(command, value = null) {
-    document.execCommand(command, false, value);
-    document.getElementById('texto-letra').focus();
+    const editor = document.getElementById('texto-letra');
+    if (editor) {
+        document.execCommand(command, false, value);
+        editor.focus();
+    }
 };
 
 window.inserirEmojiEditor = function(emoji) {
     const editor = document.getElementById('texto-letra');
-    editor.focus();
-    document.execCommand('insertText', false, emoji);
+    if (editor) {
+        editor.focus();
+        document.execCommand('insertText', false, emoji);
+    }
 };
 
 window.adicionarEmojiChat = function(emoji) {
     const input = document.getElementById('chat-input');
-    input.value += emoji;
-    input.focus();
+    if (input) {
+        input.value += emoji;
+        input.focus();
+    }
 };
 
 /**
- * 4. GESTÃO DO REPERTÓRIO
+ * 4. GESTÃO DE MÚSICAS
  */
 async function carregarMusicas() {
     const listaDiv = document.getElementById('lista-musicas');
     try {
         const res = await fetch(`${API_URL}/musics`);
+        if (!res.ok) throw new Error();
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
     } catch (err) {
-        if (listaDiv) listaDiv.innerHTML = "<p style='color:#ffa502;'>O servidor está acordando... aguarde 30s.</p>";
+        if (listaDiv) listaDiv.innerHTML = "<p style='color:#ffa502;'>Servidor em repouso... Carregando dados.</p>";
     }
 }
 
 function renderizarLista(musicas) {
     const listaDiv = document.getElementById('lista-musicas');
     const contador = document.getElementById('contador-musicas');
+    
     if (contador) contador.innerText = musicas.length;
     if (!listaDiv) return;
     
+    if (musicas.length === 0) {
+        listaDiv.innerHTML = "<p style='color:#666; padding:10px;'>Nenhuma música encontrada.</p>";
+        return;
+    }
+
     listaDiv.innerHTML = musicas.map(m => `
         <div class="item-musica" id="musica-${m._id}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333;">
             <div onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow: 1;">
@@ -98,10 +120,13 @@ function renderizarLista(musicas) {
 
 window.exibirLetra = (id) => {
     const musica = todasAsMusicas.find(m => m._id === id);
-    if (musica) {
+    const editor = document.getElementById('texto-letra');
+    const selectCat = document.getElementById('select-categoria');
+
+    if (musica && editor) {
         tituloMusicaAtual = musica.titulo; 
-        document.getElementById('texto-letra').innerHTML = musica.letra || "";
-        document.getElementById('select-categoria').value = musica.categoria || "Adoração";
+        editor.innerHTML = musica.letra || "";
+        if (selectCat) selectCat.value = musica.categoria || "Adoração";
         renderizarLinksNaGaveta(musica.links || []);
         
         document.querySelectorAll('.item-musica').forEach(i => i.style.background = "transparent");
@@ -111,16 +136,64 @@ window.exibirLetra = (id) => {
 };
 
 /**
- * 5. SALVAMENTO E UTILITÁRIOS
+ * 5. COMUNICAÇÃO (CHAT E MURAL)
+ */
+async function carregarMensagensEChat() {
+    const chat = document.getElementById('chat-mensagens');
+    const mural = document.getElementById('mural-ideias-display');
+
+    try {
+        const res = await fetch(`${API_URL}/messages`);
+        if (!res.ok) return;
+        const mensagens = await res.json();
+        
+        if (chat) {
+            chat.innerHTML = mensagens.filter(m => !m.texto.includes("💡"))
+                .map(m => `<p style="margin-bottom:8px;"><b style="color:#00d1b2">${m.usuario || 'Membro'}:</b> ${m.texto}</p>`).join('');
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        if (mural) {
+            mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse()
+                .map(m => `<div style="padding:8px; border-bottom:1px solid #333; font-size:0.9rem;">${m.texto}<br><small style="color:#f1c40f;">Por: ${m.usuario || 'Membro'}</small></div>`).join('');
+        }
+    } catch (err) {
+        console.warn("Falha ao atualizar chat/mural.");
+    }
+}
+
+async function enviarChat() {
+    const input = document.getElementById('chat-input');
+    const texto = input?.value.trim();
+    if (!texto) return;
+
+    await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            texto, 
+            usuario: localStorage.getItem('usuarioLogado') || "Membro" 
+        })
+    });
+    input.value = '';
+    carregarMensagensEChat();
+}
+
+/**
+ * 6. SALVAMENTO E PDF
  */
 async function salvarLetra() {
+    const editor = document.getElementById('texto-letra');
+    const selectCat = document.getElementById('select-categoria');
+    if (!editor) return;
+
     const titulo = prompt("Título da música:", tituloMusicaAtual);
     if (!titulo) return;
 
     const dados = {
         titulo,
-        categoria: document.getElementById('select-categoria').value,
-        letra: document.getElementById('texto-letra').innerHTML, // Salva formatação HTML
+        categoria: selectCat?.value || "Adoração",
+        letra: editor.innerHTML,
         links: listaTemporariaLinks
     };
 
@@ -131,7 +204,7 @@ async function salvarLetra() {
             body: JSON.stringify(dados)
         });
         if (res.ok) {
-            alert("Música salva com sucesso! 🙌");
+            alert("Música salva!");
             limparEditor();
             carregarMusicas();
         }
@@ -142,10 +215,9 @@ async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const editor = document.getElementById('texto-letra');
-    
-    // Converte HTML para texto simples para o PDF não bugar
-    const letraLimpa = editor.innerText;
+    if (!editor) return;
 
+    const letraLimpa = editor.innerText;
     doc.setFont("helvetica", "bold");
     doc.text(tituloMusicaAtual || "Nova Música", 10, 20);
     doc.setFont("helvetica", "normal");
@@ -154,43 +226,7 @@ async function gerarPDF() {
 }
 
 /**
- * 6. CHAT E MURAL
- */
-async function carregarMensagensEChat() {
-    try {
-        const res = await fetch(`${API_URL}/messages`);
-        const mensagens = await res.json();
-        
-        const chat = document.getElementById('chat-mensagens');
-        if (chat) {
-            chat.innerHTML = mensagens.filter(m => !m.texto.includes("💡"))
-                .map(m => `<p style="margin-bottom:8px;"><b style="color:#00d1b2">${m.usuario || 'Membro'}:</b> ${m.texto}</p>`).join('');
-            chat.scrollTop = chat.scrollHeight;
-        }
-
-        const mural = document.getElementById('mural-ideias-display');
-        if (mural) {
-            mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse()
-                .map(m => `<div style="padding:8px; border-bottom:1px solid #333; font-size:0.9rem;">${m.texto}<br><small style="color:#f1c40f;">Por: ${m.usuario || 'Membro'}</small></div>`).join('');
-        }
-    } catch (err) { }
-}
-
-async function enviarChat() {
-    const input = document.getElementById('chat-input');
-    const texto = input.value.trim();
-    if (!texto) return;
-    await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto, usuario: localStorage.getItem('usuarioLogado') || "Membro" })
-    });
-    input.value = '';
-    carregarMensagensEChat();
-}
-
-/**
- * 7. OUTRAS FUNÇÕES
+ * 7. UTILITÁRIOS
  */
 function adicionarLinkTemporario() {
     const input = document.getElementById('link-referencia');
@@ -206,7 +242,7 @@ function renderizarLinksTemporarios() {
     if (!div) return;
     div.innerHTML = listaTemporariaLinks.map((link, index) => `
         <div style="display:flex; justify-content:space-between; background:rgba(0,209,178,0.1); padding:8px; border-radius:4px; font-size:0.8rem; border:1px solid #00d1b2; margin-bottom:5px;">
-            <span style="color:#fff;">${link}</span>
+            <span style="color:#fff; overflow:hidden; text-overflow:ellipsis;">${link}</span>
             <button onclick="listaTemporariaLinks.splice(${index},1); renderizarLinksTemporarios();" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">✕</button>
         </div>
     `).join('');
@@ -215,22 +251,26 @@ function renderizarLinksTemporarios() {
 function renderizarLinksNaGaveta(links) {
     const gaveta = document.getElementById('lista-links-visualizacao');
     if (!gaveta) return;
-    gaveta.innerHTML = links && links.length > 0 
+    gaveta.innerHTML = (links && links.length > 0)
         ? links.map(link => `<a href="${link}" target="_blank" style="color:#00d1b2; margin-right:10px; font-size:0.8rem;">🔗 Link</a>`).join('')
         : '<span style="color:#666; font-size:0.8rem;">Sem links.</span>';
 }
 
 function limparEditor() {
-    document.getElementById('texto-letra').innerHTML = "";
-    document.getElementById('lista-links-dinamica').innerHTML = "";
+    const editor = document.getElementById('texto-letra');
+    const linksDiv = document.getElementById('lista-links-dinamica');
+    if (editor) editor.innerHTML = "";
+    if (linksDiv) linksDiv.innerHTML = "";
     listaTemporariaLinks = [];
     tituloMusicaAtual = "";
 }
 
 async function excluirMusica(id) {
     if (!confirm("Excluir música permanentemente?")) return;
-    await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
-    carregarMusicas();
+    try {
+        await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
+        carregarMusicas();
+    } catch (e) { alert("Erro ao excluir."); }
 }
 
 async function sugerirIdeia() {
@@ -239,7 +279,10 @@ async function sugerirIdeia() {
     await fetch(`${API_URL}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto: `💡 IDEIA: ${texto}`, usuario: localStorage.getItem('usuarioLogado') || "Membro" })
+        body: JSON.stringify({ 
+            texto: `💡 IDEIA: ${texto}`, 
+            usuario: localStorage.getItem('usuarioLogado') || "Membro" 
+        })
     });
     carregarMensagensEChat();
 }

@@ -1,24 +1,20 @@
 /**
- * 1. PORTEIRO DE SEGURANÇA
+ * 1. PORTEIRO DE SEGURANÇA E CONFIGURAÇÃO
  */
 if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'login.html';
 }
 
-/**
- * 2. CONFIGURAÇÃO DA URL
- */
 const API_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
     ? 'http://localhost:5000' 
     : 'https://grupo-de-louvor-santa-esmeralda.onrender.com';
 
-// Variáveis Globais
 let todasAsMusicas = []; 
 let listaTemporariaLinks = []; 
 let tituloMusicaAtual = ""; 
 
 /**
- * 3. INICIALIZAÇÃO
+ * 2. INICIALIZAÇÃO DO SISTEMA
  */
 document.addEventListener('DOMContentLoaded', () => {
     const nomeUsuario = localStorage.getItem('usuarioLogado');
@@ -39,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-enviar-chat')?.addEventListener('click', enviarChat);
     document.getElementById('btn-nova-ideia')?.addEventListener('click', sugerirIdeia);
 
-    // Pesquisa
+    // Pesquisa Dinâmica
     document.getElementById('input-pesquisa')?.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
         const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
@@ -48,25 +44,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * 4. BARRA DE FERRAMENTAS (RICH TEXT)
+ * 3. FERRAMENTAS DO EDITOR (Rich Text & Emojis)
  */
 window.execCmd = function(command, value = null) {
     document.execCommand(command, false, value);
     document.getElementById('texto-letra').focus();
 };
 
+window.inserirEmojiEditor = function(emoji) {
+    const editor = document.getElementById('texto-letra');
+    editor.focus();
+    document.execCommand('insertText', false, emoji);
+};
+
+window.adicionarEmojiChat = function(emoji) {
+    const input = document.getElementById('chat-input');
+    input.value += emoji;
+    input.focus();
+};
+
 /**
- * 5. FUNÇÕES DO REPERTÓRIO
+ * 4. GESTÃO DO REPERTÓRIO
  */
 async function carregarMusicas() {
     const listaDiv = document.getElementById('lista-musicas');
     try {
         const res = await fetch(`${API_URL}/musics`);
-        if (!res.ok) throw new Error("Erro na rede");
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
     } catch (err) {
-        if (listaDiv) listaDiv.innerHTML = "<p style='color:#ffa502;'>Servidor acordando... aguarde.</p>";
+        if (listaDiv) listaDiv.innerHTML = "<p style='color:#ffa502;'>O servidor está acordando... aguarde 30s.</p>";
     }
 }
 
@@ -93,7 +100,6 @@ window.exibirLetra = (id) => {
     const musica = todasAsMusicas.find(m => m._id === id);
     if (musica) {
         tituloMusicaAtual = musica.titulo; 
-        // Agora usamos innerHTML para carregar as cores e formatação
         document.getElementById('texto-letra').innerHTML = musica.letra || "";
         document.getElementById('select-categoria').value = musica.categoria || "Adoração";
         renderizarLinksNaGaveta(musica.links || []);
@@ -105,28 +111,8 @@ window.exibirLetra = (id) => {
 };
 
 /**
- * 6. SALVAMENTO E LINKS
+ * 5. SALVAMENTO E UTILITÁRIOS
  */
-function adicionarLinkTemporario() {
-    const input = document.getElementById('link-referencia');
-    if (input?.value.trim()) {
-        listaTemporariaLinks.push(input.value.trim());
-        renderizarLinksTemporarios();
-        input.value = '';
-    }
-}
-
-function renderizarLinksTemporarios() {
-    const div = document.getElementById('lista-links-dinamica');
-    if (!div) return;
-    div.innerHTML = listaTemporariaLinks.map((link, index) => `
-        <div style="display:flex; justify-content:space-between; background:rgba(0,209,178,0.1); padding:8px; border-radius:4px; font-size:0.8rem; border:1px solid #00d1b2; margin-bottom:5px;">
-            <span style="color:#fff;">${link}</span>
-            <button onclick="listaTemporariaLinks.splice(${index},1); renderizarLinksTemporarios();" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">✕</button>
-        </div>
-    `).join('');
-}
-
 async function salvarLetra() {
     const titulo = prompt("Título da música:", tituloMusicaAtual);
     if (!titulo) return;
@@ -134,8 +120,7 @@ async function salvarLetra() {
     const dados = {
         titulo,
         categoria: document.getElementById('select-categoria').value,
-        // SALVANDO O HTML (FORMATADO)
-        letra: document.getElementById('texto-letra').innerHTML,
+        letra: document.getElementById('texto-letra').innerHTML, // Salva formatação HTML
         links: listaTemporariaLinks
     };
 
@@ -146,23 +131,20 @@ async function salvarLetra() {
             body: JSON.stringify(dados)
         });
         if (res.ok) {
-            alert("Música salva!");
+            alert("Música salva com sucesso! 🙌");
             limparEditor();
             carregarMusicas();
         }
     } catch (err) { alert("Erro ao salvar."); }
 }
 
-/**
- * 7. PDF E UTILITÁRIOS
- */
 async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const htmlLetra = document.getElementById('texto-letra').innerHTML;
+    const editor = document.getElementById('texto-letra');
     
-    // Remove tags HTML para o PDF ficar limpo
-    const letraLimpa = htmlLetra.replace(/<[^>]*>/g, '\n').replace(/\n\s*\n/g, '\n');
+    // Converte HTML para texto simples para o PDF não bugar
+    const letraLimpa = editor.innerText;
 
     doc.setFont("helvetica", "bold");
     doc.text(tituloMusicaAtual || "Nova Música", 10, 20);
@@ -171,40 +153,21 @@ async function gerarPDF() {
     doc.save(`${tituloMusicaAtual || 'musica'}.pdf`);
 }
 
-function renderizarLinksNaGaveta(links) {
-    const gaveta = document.getElementById('lista-links-visualizacao');
-    if (!gaveta) return;
-    gaveta.innerHTML = links && links.length > 0 
-        ? links.map(link => `<a href="${link}" target="_blank" style="color:#00d1b2; margin-right:10px; font-size:0.8rem;">🔗 Link</a>`).join('')
-        : '<span style="color:#666; font-size:0.8rem;">Sem links.</span>';
-}
-
-function limparEditor() {
-    document.getElementById('texto-letra').innerHTML = "";
-    document.getElementById('lista-links-dinamica').innerHTML = "";
-    listaTemporariaLinks = [];
-    tituloMusicaAtual = "";
-}
-
-async function excluirMusica(id) {
-    if (!confirm("Excluir música?")) return;
-    await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
-    carregarMusicas();
-}
-
 /**
- * 8. CHAT E MURAL
+ * 6. CHAT E MURAL
  */
 async function carregarMensagensEChat() {
     try {
         const res = await fetch(`${API_URL}/messages`);
         const mensagens = await res.json();
+        
         const chat = document.getElementById('chat-mensagens');
         if (chat) {
             chat.innerHTML = mensagens.filter(m => !m.texto.includes("💡"))
                 .map(m => `<p style="margin-bottom:8px;"><b style="color:#00d1b2">${m.usuario || 'Membro'}:</b> ${m.texto}</p>`).join('');
             chat.scrollTop = chat.scrollHeight;
         }
+
         const mural = document.getElementById('mural-ideias-display');
         if (mural) {
             mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse()
@@ -226,8 +189,52 @@ async function enviarChat() {
     carregarMensagensEChat();
 }
 
+/**
+ * 7. OUTRAS FUNÇÕES
+ */
+function adicionarLinkTemporario() {
+    const input = document.getElementById('link-referencia');
+    if (input?.value.trim()) {
+        listaTemporariaLinks.push(input.value.trim());
+        renderizarLinksTemporarios();
+        input.value = '';
+    }
+}
+
+function renderizarLinksTemporarios() {
+    const div = document.getElementById('lista-links-dinamica');
+    if (!div) return;
+    div.innerHTML = listaTemporariaLinks.map((link, index) => `
+        <div style="display:flex; justify-content:space-between; background:rgba(0,209,178,0.1); padding:8px; border-radius:4px; font-size:0.8rem; border:1px solid #00d1b2; margin-bottom:5px;">
+            <span style="color:#fff;">${link}</span>
+            <button onclick="listaTemporariaLinks.splice(${index},1); renderizarLinksTemporarios();" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">✕</button>
+        </div>
+    `).join('');
+}
+
+function renderizarLinksNaGaveta(links) {
+    const gaveta = document.getElementById('lista-links-visualizacao');
+    if (!gaveta) return;
+    gaveta.innerHTML = links && links.length > 0 
+        ? links.map(link => `<a href="${link}" target="_blank" style="color:#00d1b2; margin-right:10px; font-size:0.8rem;">🔗 Link</a>`).join('')
+        : '<span style="color:#666; font-size:0.8rem;">Sem links.</span>';
+}
+
+function limparEditor() {
+    document.getElementById('texto-letra').innerHTML = "";
+    document.getElementById('lista-links-dinamica').innerHTML = "";
+    listaTemporariaLinks = [];
+    tituloMusicaAtual = "";
+}
+
+async function excluirMusica(id) {
+    if (!confirm("Excluir música permanentemente?")) return;
+    await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
+    carregarMusicas();
+}
+
 async function sugerirIdeia() {
-    const texto = prompt("Sua sugestão:");
+    const texto = prompt("Sua sugestão de música ou ideia:");
     if (!texto) return;
     await fetch(`${API_URL}/messages`, {
         method: 'POST',

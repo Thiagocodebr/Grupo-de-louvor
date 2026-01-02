@@ -48,7 +48,8 @@ async function carregarMusicas() {
         renderizarLista(todasAsMusicas);
     } catch (err) {
         console.error("Erro ao carregar repertório:", err);
-        document.getElementById('lista-musicas').innerHTML = "<p style='color:red; padding:10px;'>Erro ao carregar músicas.</p>";
+        const listaDiv = document.getElementById('lista-musicas');
+        if (listaDiv) listaDiv.innerHTML = "<p style='color:red; padding:10px;'>Erro ao carregar músicas.</p>";
     }
 }
 
@@ -57,6 +58,8 @@ function renderizarLista(musicas) {
     const contador = document.getElementById('contador-musicas');
     
     if (contador) contador.innerText = musicas.length;
+    
+    if (!listaDiv) return;
     
     if (!musicas.length) {
         listaDiv.innerHTML = '<p style="padding:10px; color:#666;">Nenhuma música encontrada.</p>';
@@ -79,19 +82,19 @@ function renderizarLista(musicas) {
 window.exibirLetra = (id) => {
     const musica = todasAsMusicas.find(m => m._id === id);
     if (musica) {
-        tituloMusicaAtual = musica.titulo; // Salva o nome para o PDF
+        tituloMusicaAtual = musica.titulo; 
         document.getElementById('texto-letra').value = musica.letra || "";
         document.getElementById('select-categoria').value = musica.categoria || "Adoração";
         renderizarLinksNaGaveta(musica.links || []);
         
-        // Destaque visual na lista
         document.querySelectorAll('.item-musica').forEach(i => i.style.background = "transparent");
-        document.getElementById(`musica-${id}`).style.background = "rgba(0, 209, 178, 0.1)";
+        const itemSelecionado = document.getElementById(`musica-${id}`);
+        if (itemSelecionado) itemSelecionado.style.background = "rgba(0, 209, 178, 0.1)";
     }
 };
 
 /**
- * 4. FUNÇÃO DE GERAÇÃO DE PDF (INTEGRADA)
+ * 4. FUNÇÃO DE GERAÇÃO DE PDF
  */
 async function gerarPDF() {
     const { jsPDF } = window.jspdf;
@@ -100,13 +103,12 @@ async function gerarPDF() {
     const categoria = document.getElementById('select-categoria').value;
 
     if (!letra.trim()) {
-        alert("O editor está vazio! Selecione uma música ou digite uma letra.");
+        alert("O editor está vazio!");
         return;
     }
 
     const tituloParaDocumento = tituloMusicaAtual || prompt("Título da Música:") || "Música Santa Esmeralda";
 
-    // Layout do PDF
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(150);
@@ -136,7 +138,7 @@ async function gerarPDF() {
  */
 function adicionarLinkTemporario() {
     const input = document.getElementById('link-referencia');
-    const url = input.value.trim();
+    const url = input?.value.trim();
     if (url) {
         listaTemporariaLinks.push(url);
         renderizarLinksTemporarios();
@@ -146,6 +148,7 @@ function adicionarLinkTemporario() {
 
 function renderizarLinksTemporarios() {
     const div = document.getElementById('lista-links-dinamica');
+    if (!div) return;
     div.innerHTML = listaTemporariaLinks.map((link, index) => `
         <div style="display:flex; justify-content:space-between; background:rgba(0,209,178,0.1); padding:8px; border-radius:4px; font-size:0.8rem; border:1px solid #00d1b2;">
             <span style="color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link}</span>
@@ -174,11 +177,11 @@ async function salvarLetra() {
         });
 
         if (res.ok) {
-            alert("Sucesso! Música salva no repertório.");
+            alert("Sucesso! Música salva.");
             limparEditor();
             carregarMusicas();
         }
-    } catch (err) { alert("Erro ao conectar com o servidor."); }
+    } catch (err) { alert("Erro ao salvar."); }
 }
 
 /**
@@ -189,39 +192,36 @@ async function carregarMensagensEChat() {
         const res = await fetch(`${API_URL}/messages`);
         const mensagens = await res.json();
 
-        // Mural de Ideias (Filtra mensagens com 💡)
         const mural = document.getElementById('mural-ideias-display');
-        const ideias = mensagens.filter(m => m.texto.includes("💡"));
-        mural.innerHTML = ideias.reverse().map(m => `
-            <div>
-                <p style="margin: 0;">${m.texto}</p>
-            </div>
-        `).join('');
+        if (mural) {
+            const ideias = mensagens.filter(m => m.texto.includes("💡"));
+            mural.innerHTML = ideias.reverse().map(m => `<div><p style="margin: 0;">${m.texto}</p></div>`).join('');
+        }
 
-        // Chat (Mensagens comuns)
         const chat = document.getElementById('chat-mensagens');
-        const conversas = mensagens.filter(m => !m.texto.includes("💡"));
-        chat.innerHTML = conversas.map(m => `
-            <div>
-                <strong style="color: #00d1b2;">Membro:</strong>
-                <p style="margin: 0; color: #eee;">${m.texto}</p>
-            </div>
-        `).join('');
-        chat.scrollTop = chat.scrollHeight;
-
-    } catch (err) { console.error("Erro ao carregar mensagens"); }
+        if (chat) {
+            const conversas = mensagens.filter(m => !m.texto.includes("💡"));
+            chat.innerHTML = conversas.map(m => `
+                <div>
+                    <strong style="color: #00d1b2;">Membro:</strong>
+                    <p style="margin: 0; color: #eee;">${m.texto}</p>
+                </div>
+            `).join('');
+            chat.scrollTop = chat.scrollHeight;
+        }
+    } catch (err) { console.error("Erro no chat"); }
 }
 
 async function enviarChat() {
     const input = document.getElementById('chat-input');
-    const texto = input.value.trim();
+    const texto = input?.value.trim();
     if (!texto) return;
     await postarMensagem(texto);
     input.value = '';
 }
 
 async function sugerirIdeia() {
-    const texto = prompt("Sugestão de música ou aviso importante:");
+    const texto = prompt("Sugestão de música ou aviso:");
     if (texto) await postarMensagem(`💡 IDEIA: ${texto}`);
 }
 
@@ -241,8 +241,9 @@ async function postarMensagem(texto) {
  */
 function renderizarLinksNaGaveta(links) {
     const gaveta = document.getElementById('lista-links-visualizacao');
+    if (!gaveta) return;
     if (!links || links.length === 0) {
-        gaveta.innerHTML = '<span style="color:#666; font-size:0.8rem;">Nenhuma referência para esta música.</span>';
+        gaveta.innerHTML = '<span style="color:#666; font-size:0.8rem;">Sem referências.</span>';
         return;
     }
     gaveta.innerHTML = links.map(link => `
@@ -255,19 +256,15 @@ function renderizarLinksNaGaveta(links) {
 function limparEditor() {
     document.getElementById('texto-letra').value = "";
     document.getElementById('lista-links-dinamica').innerHTML = "";
-    document.getElementById('lista-links-visualizacao').innerHTML = '<span style="color:#666; font-size:0.8rem;">Clique em uma música para ver os links</span>';
+    document.getElementById('lista-links-visualizacao').innerHTML = '<span style="color:#666; font-size:0.8rem;">Clique em uma música</span>';
     listaTemporariaLinks = [];
     tituloMusicaAtual = "";
 }
 
 async function excluirMusica(id) {
-    if (!confirm("Tem certeza que deseja excluir esta música do repertório?")) return;
+    if (!confirm("Excluir música?")) return;
     try {
         const res = await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
         if (res.ok) carregarMusicas();
     } catch (err) { console.error(err); }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> b43a564e185e58cfaac5de8fe6f3a990f3241d48

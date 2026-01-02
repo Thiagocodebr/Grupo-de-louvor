@@ -83,7 +83,7 @@ app.delete('/musics/:id', async (req, res) => {
     }
 });
 
-// --- ROTAS DO CHAT ---
+// --- ROTAS DO CHAT (REFATORADA) ---
 app.get('/messages', async (req, res) => {
     try {
         const mensagens = await mongoose.connection.collection('messages').find().sort({ data: 1 }).toArray();
@@ -93,7 +93,12 @@ app.get('/messages', async (req, res) => {
 
 app.post('/messages', async (req, res) => {
     try {
-        const novaMsg = { texto: req.body.texto, data: new Date() };
+        // AJUSTE AQUI: Capturando o campo 'usuario' enviado pelo frontend
+        const novaMsg = { 
+            texto: req.body.texto, 
+            usuario: req.body.usuario, // Agora o servidor aceita o nome
+            data: new Date() 
+        };
         await mongoose.connection.collection('messages').insertOne(novaMsg);
         res.status(201).json(novaMsg);
     } catch (err) { res.status(500).send(err); }

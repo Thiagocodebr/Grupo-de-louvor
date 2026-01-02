@@ -6,6 +6,48 @@
     <title>Grupo de Louvor Santa Esmeralda</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Estilos rápidos para a nova barra de ferramentas */
+        .toolbar {
+            background: #222;
+            padding: 8px;
+            border: 1px solid #444;
+            border-bottom: none;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-radius: 8px 8px 0 0;
+            align-items: center;
+        }
+        .toolbar button {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .toolbar button:hover { background: #444; border-color: #00d1b2; }
+        .toolbar select, .toolbar input[type="color"] {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .editor-rich {
+            min-height: 400px;
+            background: #1a1a1a;
+            color: white;
+            padding: 15px;
+            border: 1px solid #444;
+            border-radius: 0 0 8px 8px;
+            outline: none;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
 
@@ -48,9 +90,8 @@
             
             <div class="referencias-box" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
                 <h3>🔗 Adicionar Referência Temporária</h3>
-                <small style="color: #888; display: block; margin-bottom: 5px;">Cole o link antes de salvar a letra:</small>
                 <div style="display: flex; gap: 8px;">
-                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link do YouTube/Spotify..." style="flex-grow: 1;">
+                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link YouTube..." style="flex-grow: 1;">
                     <button id="btn-add-link" class="btn-acao js-hover-target" style="width: 50px; background-color: #00d1b2; color: black; font-weight: bold;">+</button>
                 </div>
                 <div id="lista-links-dinamica" style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;"></div>
@@ -58,18 +99,18 @@
         </section>
 
         <section id="editor-letras" class="painel painel-letras">
-            <h2>✍️ Editor de Letras</h2>
+            <h2>✍️ Editor de Letras Profissional</h2>
 
             <div id="area-links-salvos" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444;">
                 <small style="color: #00d1b2; font-weight: bold;">📺 Referências Salvas:</small>
                 <div id="lista-links-visualizacao" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
-                    <span style="color: #666; font-size: 0.8rem;">Clique em uma música para ver os links</span>
+                    <span style="color: #666; font-size: 0.8rem;">Clique em uma música para ver</span>
                 </div>
             </div>
             
             <div class="editor-area">
                 <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <label for="select-categoria" style="font-size: 0.9rem;">Classificação:</label>
+                    <label style="font-size: 0.9rem;">Classificação:</label>
                     <select id="select-categoria" style="padding: 5px 10px; border-radius: 5px; background: #333; color: white; border: 1px solid #555;">
                         <option value="Adoração">Adoração</option>
                         <option value="Celebração">Celebração</option>
@@ -79,29 +120,41 @@
                     </select>
                 </div>
 
-                <textarea id="texto-letra" class="input-padrao textarea-editor" placeholder="Digite ou cole a letra da música aqui..."></textarea>
+                <div class="toolbar">
+                    <button onclick="execCmd('bold')" title="Negrito"><b>B</b></button>
+                    <button onclick="execCmd('italic')" title="Itálico"><i>I</i></button>
+                    <button onclick="execCmd('underline')" title="Sublinhado"><u>U</u></button>
+                    
+                    <select onchange="execCmd('fontSize', this.value)" style="width: 100px;">
+                        <option value="3">Médio</option>
+                        <option value="1">Pequeno</option>
+                        <option value="5">Grande</option>
+                        <option value="7">Extra</option>
+                    </select>
+
+                    <input type="color" oninput="execCmd('foreColor', this.value)" title="Cor da Letra">
+                    
+                    <button onclick="document.getElementById('texto-letra').focus()" title="Emojis">
+                        😀 <small style="font-size: 0.6rem;">(Win + .)</small>
+                    </button>
+                </div>
+
+                <div id="texto-letra" class="editor-rich" contenteditable="true"></div>
                 
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                     <button id="btn-salvar-letra" class="btn-acao js-hover-target" style="background-color: #2ecc71;">Salvar Tudo</button>
                     <button id="btn-gerar-pdf" class="btn-acao js-hover-target" style="background-color: #eb4d4b;">Gerar PDF</button>
-                    <button id="btn-limpar-editor" class="btn-acao js-hover-target" style="background-color: #7f8c8d;">Limpar Editor</button>
+                    <button id="btn-limpar-editor" class="btn-acao js-hover-target" style="background-color: #7f8c8d;">Limpar</button>
                 </div>
-            </div>
-            
-            <div class="upload-box" style="margin-top: 20px;">
-                <h3>📂 Partituras e Documentos (PDF)</h3>
-                <input type="file" id="upload-pdf" accept=".pdf">
-                <button id="btn-enviar-pdf" class="btn-acao js-hover-target">Fazer Upload</button>
             </div>
         </section>
 
         <section class="painel painel-chat">
-            
             <div style="margin-bottom: 25px;">
                 <h2 style="color: #f1c40f;">💡 Mural de Ideias</h2>
                 <div id="mural-ideias-display" style="height: 200px; overflow-y: auto; background: rgba(241, 196, 15, 0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.2); margin-bottom: 10px;">
                 </div>
-                <button id="btn-nova-ideia" class="btn-acao js-hover-target" style="background-color: #f1c40f; color: black; font-weight: bold; width: 100%;">+ Sugerir Música ou Ideia</button>
+                <button id="btn-nova-ideia" class="btn-acao js-hover-target" style="background-color: #f1c40f; color: black; font-weight: bold; width: 100%;">+ Sugerir Ideia</button>
             </div>
 
             <hr style="border: 0; border-top: 1px solid #333; margin-bottom: 25px;">
@@ -111,19 +164,18 @@
                 <div id="chat-mensagens" class="chat-display" style="height: 250px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333;">
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="chat-input" class="input-padrao" placeholder="Digite uma mensagem..." style="flex-grow: 1;">
+                    <input type="text" id="chat-input" class="input-padrao" placeholder="Mensagem..." style="flex-grow: 1;">
                     <button id="btn-enviar-chat" class="btn-acao js-hover-target" style="width: auto; padding: 0 15px;">Enviar</button>
                 </div>
             </div>
-
         </section>
 
     </main>
 
     <footer class="rodape">
-        <p>&copy; 2025 Plataforma Colaborativa Santa Esmeralda. Todos os direitos reservados.</p>
+        <p>&copy; 2026 Plataforma Colaborativa Santa Esmeralda.</p>
     </footer>
 
-    <script src="app.js?v=16"></script>
+    <script src="app.js?v=17"></script>
 </body>
 </html>

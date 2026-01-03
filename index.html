@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* Estilos base integrados */
         .toolbar {
             background: #222; padding: 10px; border: 1px solid #444;
             border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap;
@@ -20,6 +19,16 @@
         }
         .emoji-btn-toggle { font-size: 1.2rem; cursor: pointer; background: #333; border: 1px solid #555; border-radius: 4px; padding: 2px 8px; color: white; }
         .btn-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        
+        /* Estilo extra para a Agenda */
+        .agenda-box {
+            background: rgba(0, 209, 178, 0.1);
+            border: 1px solid #00d1b2;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -102,22 +111,27 @@
         </section>
 
         <section id="comunidade" class="painel">
-            <h2>💬 Chat em Tempo Real</h2>
-            <div id="chat-mensagens" style="height: 300px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem;"></div>
+            <div class="agenda-box">
+                <h3 style="margin: 0; color: #00d1b2;">📅 Próximo Ensaio</h3>
+                <p id="data-ensaio-display" style="font-size: 1.1rem; margin: 10px 0; font-weight: bold;">Não definido</p>
+                <button onclick="definirNovoEnsaio()" style="background: none; border: 1px dashed #00d1b2; color: #00d1b2; cursor: pointer; font-size: 0.7rem; padding: 2px 10px;">Atualizar Data</button>
+            </div>
+
+            <h2>💬 Chat</h2>
+            <div id="chat-mensagens" style="height: 250px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem;"></div>
             
-            <div class="emoji-container" style="display: flex; gap: 8px;">
+            <div class="emoji-container" style="display: flex; gap: 8px; margin-bottom: 30px;">
                 <input type="text" id="chat-input" placeholder="Conversar..." style="flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;">
-                
                 <div style="position: relative;">
                     <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-chat')">😀</button>
                     <div id="picker-chat" class="emoji-picker" style="bottom: 45px; right: 0;"></div>
                 </div>
-                
                 <button id="btn-enviar-chat" class="btn-acao">Enviar</button>
             </div>
 
-            <h2 style="margin-top: 30px;">💡 Mural de Ideias</h2>
-            <div id="mural-ideias-display" style="min-height: 150px; padding: 5px; overflow-y: auto; max-height: 300px;"></div>
+            <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+            <h2>💡 Mural de Ideias</h2>
+            <div id="mural-ideias-display" style="min-height: 150px; padding: 5px; overflow-y: auto; max-height: 250px;"></div>
             <button id="btn-nova-ideia" class="btn-acao" style="width: 100%; margin-top: 10px; background: #f1c40f; color: #000; font-weight: bold;">Sugerir Nova Ideia</button>
         </section>
 

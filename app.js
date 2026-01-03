@@ -13,7 +13,6 @@ let todasAsMusicas = [];
 let listaTemporariaLinks = []; 
 let tituloMusicaAtual = ""; 
 
-// Emojis expandidos
 const BANCO_EMOJIS = ['🙏','🎶','❤️','🙌','✨','🔥','😊','😂','😮','😢','👏','🎸','🎹','🎤','🌟','☁️'];
 
 /**
@@ -24,9 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const boasVindasElem = document.getElementById('boas-vindas');
     if (boasVindasElem && nomeUsuario) boasVindasElem.innerText = `Olá, ${nomeUsuario}! 🙏`;
     
+    // Inicializar dados
     carregarMusicas();
     carregarMensagensEChat();
+    carregarAgenda(); // Nova função da agenda
     
+    // Atualização em tempo real (10s)
     setInterval(() => carregarMensagensEChat(), 10000); 
 
     // Listeners principais
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Pesquisa de músicas
     document.getElementById('input-pesquisa')?.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
         renderizarLista(todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo)));
@@ -51,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * 3. SISTEMA DE EMOJIS (SELETOR)
+ * 3. SISTEMA DE EMOJIS
  */
 window.toggleEmojiPicker = function(id) {
     const picker = document.getElementById(id);
@@ -79,8 +82,28 @@ window.colarEmoji = function(emoji, pickerId) {
 };
 
 /**
- * 4. COMUNICAÇÃO (CHAT E MURAL)
+ * 4. COMUNICAÇÃO (CHAT, MURAL E AGENDA)
  */
+
+// --- AGENDA DE ENSAIOS ---
+function carregarAgenda() {
+    const dataSalva = localStorage.getItem('proximoEnsaio') || "Não definido";
+    const display = document.getElementById('data-ensaio-display');
+    if (display) display.innerText = dataSalva;
+}
+
+window.definirNovoEnsaio = function() {
+    const novaData = prompt("Digite a data e hora do ensaio (ex: Terça, 20h):");
+    if (novaData) {
+        localStorage.setItem('proximoEnsaio', novaData);
+        carregarAgenda();
+        // Avisa no chat
+        const usuario = localStorage.getItem('usuarioLogado');
+        enviarMensagemAoServidor(`📅 NOVO ENSAIO: ${novaData}`, usuario);
+    }
+};
+
+// --- CHAT E MURAL ---
 async function carregarMensagensEChat() {
     const chat = document.getElementById('chat-mensagens');
     const mural = document.getElementById('mural-ideias-display');
@@ -96,7 +119,6 @@ async function carregarMensagensEChat() {
         }
 
         if (mural) {
-            // .slice(0, 10) mantém apenas as 10 mensagens mais recentes visíveis
             mural.innerHTML = mensagens.filter(m => m.texto.includes("💡")).reverse().slice(0, 10)
                 .map(m => `
                     <div class="card-ideia" style="position:relative; padding:10px; border-bottom:1px solid #333; background:rgba(255,255,255,0.03); margin-bottom:5px; border-radius:5px;">
@@ -109,6 +131,29 @@ async function carregarMensagensEChat() {
     } catch (err) { console.warn("Erro ao carregar mensagens."); }
 }
 
+async function enviarMensagemAoServidor(texto, usuario) {
+    await fetch(`${API_URL}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto, usuario })
+    });
+    carregarMensagensEChat();
+}
+
+async function enviarChat() {
+    const input = document.getElementById('chat-input');
+    const texto = input?.value.trim();
+    if (!texto) return;
+    await enviarMensagemAoServidor(texto, localStorage.getItem('usuarioLogado'));
+    input.value = '';
+}
+
+async function sugerirIdeia() {
+    const texto = prompt("Sua ideia para o grupo:");
+    if (!texto) return;
+    await enviarMensagemAoServidor(`💡 IDEIA: ${texto}`, localStorage.getItem('usuarioLogado'));
+}
+
 window.excluirItemMural = async function(id) {
     if (!confirm("Remover esta ideia do mural?")) return;
     try {
@@ -116,20 +161,6 @@ window.excluirItemMural = async function(id) {
         if (res.ok) carregarMensagensEChat();
     } catch (e) { alert("Erro ao excluir."); }
 };
-
-async function enviarChat() {
-    const input = document.getElementById('chat-input');
-    const texto = input?.value.trim();
-    if (!texto) return;
-
-    await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto, usuario: localStorage.getItem('usuarioLogado') })
-    });
-    input.value = '';
-    carregarMensagensEChat();
-}
 
 /**
  * 5. GESTÃO DE MÚSICAS E EDITOR
@@ -141,7 +172,7 @@ async function carregarMusicas() {
         todasAsMusicas = await res.json();
         renderizarLista(todasAsMusicas);
     } catch (err) {
-        if (listaDiv) listaDiv.innerHTML = "<p>Servidor carregando...</p>";
+        if (listaDiv) listaDiv.innerHTML = "<p>Conectando ao servidor...</p>";
     }
 }
 
@@ -168,6 +199,7 @@ window.exibirLetra = (id) => {
         document.getElementById('texto-letra').innerHTML = musica.letra || "";
         document.getElementById('select-categoria').value = musica.categoria || "Adoração";
         renderizarLinksNaGaveta(musica.links || []);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
@@ -190,7 +222,7 @@ async function salvarLetra() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
     });
-    alert("Salvo!");
+    alert("Música salva com sucesso!");
     carregarMusicas();
 }
 
@@ -228,27 +260,19 @@ function renderizarLinksNaGaveta(links) {
 }
 
 function limparEditor() {
-    document.getElementById('texto-letra').innerHTML = "";
-    listaTemporariaLinks = [];
-    tituloMusicaAtual = "";
-}
-
-async function excluirMusica(id) {
-    if (confirm("Excluir música?")) {
-        await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
-        carregarMusicas();
+    if(confirm("Limpar todo o editor?")) {
+        document.getElementById('texto-letra').innerHTML = "";
+        listaTemporariaLinks = [];
+        tituloMusicaAtual = "";
+        document.getElementById('lista-links-visualizacao').innerHTML = "";
     }
 }
 
-async function sugerirIdeia() {
-    const texto = prompt("Sua ideia:");
-    if (!texto) return;
-    await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto: `💡 IDEIA: ${texto}`, usuario: localStorage.getItem('usuarioLogado') })
-    });
-    carregarMensagensEChat();
+async function excluirMusica(id) {
+    if (confirm("Excluir música permanentemente?")) {
+        await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
+        carregarMusicas();
+    }
 }
 
 window.sair = () => {

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Seus estilos integrados */
         .toolbar {
             background: #222; padding: 10px; border: 1px solid #444;
             border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap;
@@ -20,7 +21,6 @@
         .emoji-btn-toggle { font-size: 1.2rem; cursor: pointer; background: #333; border: 1px solid #555; border-radius: 4px; padding: 2px 8px; color: white; }
         .btn-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
         
-        /* Estilo extra para a Agenda */
         .agenda-box {
             background: rgba(0, 209, 178, 0.1);
             border: 1px solid #00d1b2;
@@ -28,6 +28,16 @@
             padding: 15px;
             margin-bottom: 20px;
             text-align: center;
+        }
+
+        /* Novo estilo para o Quadro de Avisos */
+        .aviso-box {
+            background: rgba(241, 196, 15, 0.1);
+            border: 2px solid #f1c40f;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -111,6 +121,17 @@
         </section>
 
         <section id="comunidade" class="painel">
+            
+            <div class="aviso-box">
+                <h2 style="color: #f1c40f; margin: 0; border: none; font-size: 1.2rem;">📌 Quadro de Avisos</h2>
+                <div id="quadro-avisos-display" style="padding: 10px 0; min-height: 40px; color: #fff; font-size: 0.95rem; line-height: 1.4;">
+                    Carregando avisos importantes...
+                </div>
+                <button onclick="editarQuadroAvisos()" style="width: 100%; background: #f1c40f; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 0.8rem;">
+                    📝 EDITAR QUADRO
+                </button>
+            </div>
+
             <div class="agenda-box">
                 <h3 style="margin: 0; color: #00d1b2;">📅 Próximo Ensaio</h3>
                 <p id="data-ensaio-display" style="font-size: 1.1rem; margin: 10px 0; font-weight: bold;">Não definido</p>

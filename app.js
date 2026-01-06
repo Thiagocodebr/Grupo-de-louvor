@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar dados
     carregarMusicas();
     carregarMensagensEChat();
-    carregarAgenda(); // Nova função da agenda
+    carregarAgenda(); 
+    carregarQuadroAvisos(); // Inicializa o Quadro de Avisos
     
     // Atualização em tempo real (10s)
     setInterval(() => carregarMensagensEChat(), 10000); 
@@ -82,8 +83,38 @@ window.colarEmoji = function(emoji, pickerId) {
 };
 
 /**
- * 4. COMUNICAÇÃO (CHAT, MURAL E AGENDA)
+ * 4. COMUNICAÇÃO (CHAT, MURAL, AGENDA E QUADRO DE AVISOS)
  */
+
+// --- QUADRO DE AVISOS (NOVO) ---
+async function carregarQuadroAvisos() {
+    const display = document.getElementById('quadro-avisos-display');
+    try {
+        const res = await fetch(`${API_URL}/messages`);
+        const mensagens = await res.json();
+        
+        // Filtra a mensagem mais recente que contém a "tag" de quadro de avisos
+        const ultimoAviso = mensagens
+            .filter(m => m.texto.startsWith("SISTEMA_QUADRO:"))
+            .reverse()[0];
+
+        if (display) {
+            display.innerText = ultimoAviso 
+                ? ultimoAviso.texto.replace("SISTEMA_QUADRO:", "") 
+                : "Nenhum aviso importante no momento. 👐";
+        }
+    } catch (err) { console.warn("Erro ao carregar avisos."); }
+}
+
+window.editarQuadroAvisos = async function() {
+    const display = document.getElementById('quadro-avisos-display');
+    const novoAviso = prompt("Digite o novo aviso oficial:", display.innerText);
+    
+    if (novoAviso !== null && novoAviso.trim() !== "") {
+        await enviarMensagemAoServidor(`SISTEMA_QUADRO:${novoAviso}`, "LIDERANÇA");
+        carregarQuadroAvisos();
+    }
+};
 
 // --- AGENDA DE ENSAIOS ---
 function carregarAgenda() {
@@ -97,7 +128,6 @@ window.definirNovoEnsaio = function() {
     if (novaData) {
         localStorage.setItem('proximoEnsaio', novaData);
         carregarAgenda();
-        // Avisa no chat
         const usuario = localStorage.getItem('usuarioLogado');
         enviarMensagemAoServidor(`📅 NOVO ENSAIO: ${novaData}`, usuario);
     }
@@ -112,8 +142,12 @@ async function carregarMensagensEChat() {
         const res = await fetch(`${API_URL}/messages`);
         const mensagens = await res.json();
         
+        // Atualiza Quadro de Avisos silenciosamente junto com o chat
+        carregarQuadroAvisos();
+
         if (chat) {
-            chat.innerHTML = mensagens.filter(m => !m.texto.includes("💡"))
+            // Filtra: Esconde ideias (💡) E mensagens do sistema de quadro (SISTEMA_QUADRO:)
+            chat.innerHTML = mensagens.filter(m => !m.texto.includes("💡") && !m.texto.startsWith("SISTEMA_QUADRO:"))
                 .map(m => `<p style="margin-bottom:8px;"><b style="color:#00d1b2">${m.usuario || 'Membro'}:</b> ${m.texto}</p>`).join('');
             chat.scrollTop = chat.scrollHeight;
         }

@@ -50,16 +50,19 @@
         }
         .progress-bar-bg {
             background: #333;
-            height: 10px;
-            border-radius: 5px;
+            height: 12px;
+            border-radius: 6px;
             margin: 15px 0 5px 0;
             overflow: hidden;
+            cursor: pointer; /* Indica que é clicável */
+            border: 1px solid rgba(255, 77, 148, 0.3);
         }
         .progress-bar-fill {
             background: #ff4d94;
             height: 100%;
-            width: 45%; /* Você pode ajustar isso manualmente conforme as doações entram */
-            transition: width 0.5s ease;
+            width: 0%; /* Começa em 0, o app.js vai preencher */
+            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px rgba(255, 77, 148, 0.5);
         }
     </style>
 </head>
@@ -146,27 +149,27 @@
             
             <div class="pix-box">
                 <h2 style="color: #ff4d94; margin: 0; border: none; font-size: 1.2rem;">💖 Doe Agora / Vaquinha</h2>
-                <p style="font-size: 0.75rem; color: #bbb; margin: 8px 0;">Contribua com a manutenção dos nossos instrumentos e equipamentos.</p>
+                <p style="font-size: 0.75rem; color: #bbb; margin: 8px 0;">Ajude com equipamentos e manutenção do nosso louvor.</p>
                 
-                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0;">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_PIX_AQUI" 
+                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_AQUI" 
                          alt="QR Code Pix" style="width: 120px; height: 120px; display: block;">
                 </div>
 
-                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 77, 148, 0.2);">
                     <small style="color: #ff4d94; font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">Chave Pix:</small>
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px;">
                         <span id="chave-pix-texto" style="font-size: 0.85rem; color: #fff; word-break: break-all;">seu-email@exemplo.com</span>
-                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; margin-left: 5px;">Copiar</button>
+                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold;">Copiar</button>
                     </div>
                 </div>
 
-                <div class="progress-bar-bg">
+                <div class="progress-bar-bg" onclick="definirValorVaquinha()" title="Clique para atualizar o valor (Líder)">
                     <div class="progress-bar-fill"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold;">
-                    <span>Meta: R$ 200</span>
-                    <span>45%</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold; margin-top: 5px;">
+                    <span id="meta-label">Meta: R$ 200</span>
+                    <span id="porcentagem-label">0%</span>
                 </div>
             </div>
 

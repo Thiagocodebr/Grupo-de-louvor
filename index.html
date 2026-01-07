@@ -30,7 +30,6 @@
             text-align: center;
         }
 
-        /* Novo estilo para o Quadro de Avisos */
         .aviso-box {
             background: rgba(241, 196, 15, 0.1);
             border: 2px solid #f1c40f;
@@ -38,6 +37,29 @@
             padding: 15px;
             margin-bottom: 25px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Estilo para a Seção de Doação/Vaquinha */
+        .pix-box {
+            background: linear-gradient(145deg, rgba(255, 77, 148, 0.1), rgba(255, 77, 148, 0.05));
+            border: 1px solid #ff4d94;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .progress-bar-bg {
+            background: #333;
+            height: 10px;
+            border-radius: 5px;
+            margin: 15px 0 5px 0;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: #ff4d94;
+            height: 100%;
+            width: 45%; /* Você pode ajustar isso manualmente conforme as doações entram */
+            transition: width 0.5s ease;
         }
     </style>
 </head>
@@ -122,6 +144,32 @@
 
         <section id="comunidade" class="painel">
             
+            <div class="pix-box">
+                <h2 style="color: #ff4d94; margin: 0; border: none; font-size: 1.2rem;">💖 Doe Agora / Vaquinha</h2>
+                <p style="font-size: 0.75rem; color: #bbb; margin: 8px 0;">Contribua com a manutenção dos nossos instrumentos e equipamentos.</p>
+                
+                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_PIX_AQUI" 
+                         alt="QR Code Pix" style="width: 120px; height: 120px; display: block;">
+                </div>
+
+                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                    <small style="color: #ff4d94; font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">Chave Pix:</small>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px;">
+                        <span id="chave-pix-texto" style="font-size: 0.85rem; color: #fff; word-break: break-all;">seu-email@exemplo.com</span>
+                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; margin-left: 5px;">Copiar</button>
+                    </div>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold;">
+                    <span>Meta: R$ 200</span>
+                    <span>45%</span>
+                </div>
+            </div>
+
             <div class="aviso-box">
                 <h2 style="color: #f1c40f; margin: 0; border: none; font-size: 1.2rem;">📌 Quadro de Avisos</h2>
                 <div id="quadro-avisos-display" style="padding: 10px 0; min-height: 40px; color: #fff; font-size: 0.95rem; line-height: 1.4;">

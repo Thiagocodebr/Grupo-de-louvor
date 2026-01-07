@@ -313,3 +313,15 @@ window.sair = () => {
     localStorage.removeItem('usuarioLogado');
     window.location.href = 'login.html';
 };
+
+// --- FUNCIONALIDADE: COPIAR PIX ---
+window.copiarPix = function() {
+    // Pegamos o texto da chave usando o ID correto do novo HTML
+    const texto = document.getElementById('chave-pix-texto').innerText;
+    
+    navigator.clipboard.writeText(texto).then(() => {
+        alert("Chave PIX copiada! ❤️ Obrigado pela contribuição.");
+    }).catch(err => {
+        console.error("Erro ao copiar: ", err);
+    });
+};

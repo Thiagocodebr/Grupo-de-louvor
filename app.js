@@ -1,37 +1,33 @@
 /**
- * CONFIGURAÇÃO GLOBAL E ESTADO
+ * CONFIGURAÇÕES E ESTADO GLOBAL
  */
 const API_URL = 'https://grupo-de-louvor-santa-esmeralda.onrender.com';
 let todasAsMusicas = [];
 let timerInterval = null;
 const BANCO_EMOJIS = ['🙏','🎶','❤️','🙌','✨','🔥','😊','😂'];
 
-// Proteção de Login
+// Proteção de Login imediata
 if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'login.html';
 }
 
 /**
- * INICIALIZAÇÃO
+ * INICIALIZAÇÃO DO SISTEMA
  */
 document.addEventListener('DOMContentLoaded', async () => {
-    // Boas-vindas
+    // Configura Boas-vindas
     const boasVindas = document.getElementById('boas-vindas');
     if (boasVindas) boasVindas.innerText = `Olá, ${localStorage.getItem('usuarioLogado')}!`;
 
     // Carregamento Inicial
     executarCarregamentoInicial();
     
-    // Polling de Mensagens (10s)
+    // Polling de Mensagens/Chat (10s)
     setInterval(() => carregarMensagensEChat().catch(() => {}), 10000);
 
-    // Listener de Pesquisa
+    // Event Listeners (UI)
     document.getElementById('input-pesquisa')?.addEventListener('input', filtrarMusicas);
-
-    // Listener para Salvar Letra
     document.getElementById('btn-salvar-letra')?.addEventListener('click', salvarMusica);
-    
-    // Listener para Gerar PDF
     document.getElementById('btn-gerar-pdf')?.addEventListener('click', gerarPDF);
 });
 
@@ -39,6 +35,18 @@ async function executarCarregamentoInicial() {
     try { await carregarMusicas(); } catch (e) { console.error("Erro Musicas:", e); }
     try { await carregarMensagensEChat(); } catch (e) { console.error("Erro Chat:", e); }
     try { carregarAgenda(); } catch (e) { console.error("Erro Agenda:", e); }
+}
+
+/**
+ * LÓGICA DE CIFRAS E ACORDES (SISTEMA INTELIGENTE)
+ */
+function destacarAcordes(texto) {
+    // Detecta padrões de acordes (Ex: C, G7, Am, D/F#, Bb)
+    const regexAcordes = /\b([A-G][b#]?(2|4|5|6|7|9|11|13|maj7|maj9|min7|m7|m|sus2|sus4|add9|dim|aug)?(\/[A-G][b#]?)?)\b/g;
+    
+    return texto.replace(regexAcordes, (acorde) => {
+        return `<span style="color: #f1c40f; font-weight: bold; background: rgba(241, 196, 15, 0.15); padding: 1px 4px; border-radius: 4px; border-bottom: 1px solid rgba(241, 196, 15, 0.3);">${acorde}</span>`;
+    });
 }
 
 /**
@@ -64,7 +72,7 @@ function renderizarLista(musicas) {
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #222;">
                 <div onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow:1;">
                     <span style="font-weight:500;">${m.titulo}</span>
-                    ${m.categoria ? `<br><small style="color:#00d1b2; font-size:0.7rem;">${m.categoria}</small>` : ''}
+                    <br><small style="color:#00d1b2; font-size:0.7rem;">${m.categoria || 'Sem Categoria'} ${m.tom ? ' | Tom: '+m.tom : ''}</small>
                 </div>
                 <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:1.2rem;">&times;</button>
             </div>
@@ -83,26 +91,28 @@ window.filtrarCategoria = (cat) => {
 };
 
 /**
- * EDITOR E SALVAMENTO
+ * EDITOR, EXIBIÇÃO E SALVAMENTO
  */
 async function salvarMusica() {
     const titulo = prompt("Título da música:");
     const letra = document.getElementById('texto-letra').innerHTML;
     const categoria = document.getElementById('select-categoria').value;
     const link = document.getElementById('link-midia').value;
+    const tom = document.getElementById('tom-musica').value;
 
     if (!titulo || !letra) return alert("Preencha título e letra!");
 
     const res = await fetch(`${API_URL}/musics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ titulo, letra, categoria, link })
+        body: JSON.stringify({ titulo, letra, categoria, link, tom })
     });
 
     if (res.ok) {
-        alert("Salvo com sucesso!");
+        alert("Música salva com sucesso! ✨");
         carregarMusicas();
         document.getElementById('link-midia').value = "";
+        document.getElementById('tom-musica').value = "";
     }
 }
 
@@ -110,14 +120,20 @@ window.exibirLetra = (id) => {
     const m = todasAsMusicas.find(x => x._id === id);
     if (!m) return;
 
-    let display = m.letra;
-    if (m.link) {
-        display = `<div style="margin-bottom:15px; background:rgba(29,185,84,0.1); padding:10px; border-radius:8px; border:1px solid #1DB954;">
-            <a href="${m.link}" target="_blank" style="color:#1DB954; text-decoration:none; font-weight:bold;">📺 ABRIR VÍDEO/LINK DE APOIO</a>
-        </div>` + display;
-    }
+    // Processa a letra com destaque de acordes
+    let letraProcessada = destacarAcordes(m.letra);
+
+    // Constrói o cabeçalho de exibição
+    const header = `
+        <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #333;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="background:#f1c40f; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem;">TOM: ${m.tom || 'N/D'}</span>
+                ${m.link ? `<a href="${m.link}" target="_blank" style="color:#1DB954; font-weight:bold; font-size:0.8rem; text-decoration:none;">📺 ABRIR VÍDEO</a>` : ''}
+            </div>
+        </div>
+    `;
     
-    document.getElementById('texto-letra').innerHTML = display;
+    document.getElementById('texto-letra').innerHTML = header + letraProcessada;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -150,7 +166,7 @@ async function carregarMensagensEChat() {
         chat.scrollTop = chat.scrollHeight;
     }
 
-    // Mural
+    // Mural de Ideias
     const mural = document.getElementById('mural-ideias-display');
     if (mural) {
         mural.innerHTML = msgs.filter(m => m.texto.includes("💡")).reverse()
@@ -159,7 +175,7 @@ async function carregarMensagensEChat() {
 }
 
 /**
- * UTILITÁRIOS E AGENDA
+ * UTILITÁRIOS, AGENDA E PDF
  */
 function atualizarCronometro(dataDestino) {
     const display = document.getElementById('countdown-timer');
@@ -181,7 +197,7 @@ function atualizarCronometro(dataDestino) {
 }
 
 window.definirNovoEnsaio = () => {
-    const input = prompt("Data (AAAA-MM-DD HH:MM):", "2026-01-20 19:30");
+    const input = prompt("Data do ensaio (AAAA-MM-DD HH:MM):", "2026-01-31 19:30");
     if (input) {
         localStorage.setItem('proximoEnsaio', input);
         carregarAgenda();
@@ -198,11 +214,6 @@ function carregarAgenda() {
     }
 }
 
-window.enviarChat = () => {
-    const i = document.getElementById('chat-input');
-    if (i.value) { enviarMensagem(i.value, localStorage.getItem('usuarioLogado')); i.value = ''; }
-};
-
 async function enviarMensagem(texto, usuario) {
     await fetch(`${API_URL}/messages`, {
         method: 'POST',
@@ -212,31 +223,33 @@ async function enviarMensagem(texto, usuario) {
     carregarMensagensEChat();
 }
 
-/**
- * FUNÇÕES DE INTERAÇÃO (WINDOW)
- */
+window.enviarChat = () => {
+    const i = document.getElementById('chat-input');
+    if (i.value) { enviarMensagem(i.value, localStorage.getItem('usuarioLogado')); i.value = ''; }
+};
+
 window.copiarPix = () => {
     navigator.clipboard.writeText(document.getElementById('chave-pix-texto').innerText);
-    alert("Pix copiado!");
+    alert("Chave Pix copiada! ❤️");
 };
 
 window.editarQuadroAvisos = () => {
-    const n = prompt("Novo aviso:");
+    const n = prompt("Novo aviso para o grupo:");
     if (n) enviarMensagem(`SISTEMA_QUADRO:${n}`, "LÍDER");
 };
 
 window.definirValorVaquinha = () => {
-    const v = prompt("Valor arrecadado:");
+    const v = prompt("Quanto já arrecadamos?");
     if (v) enviarMensagem(`SISTEMA_VAQUINHA:${v}`, "SISTEMA");
 };
 
 window.adicionarNovaIdeia = () => {
-    const id = prompt("Sua sugestão:");
+    const id = prompt("Sua ideia ou sugestão:");
     if (id) enviarMensagem(`💡 IDEIA: ${id}`, localStorage.getItem('usuarioLogado'));
 };
 
 window.excluirMusica = async (id) => {
-    if (confirm("Excluir?")) {
+    if (confirm("Deseja mesmo excluir esta música?")) {
         await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
         carregarMusicas();
     }
@@ -255,7 +268,11 @@ window.sair = () => { localStorage.clear(); window.location.href = 'login.html';
 async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const titulo = "Música - Grupo Santa Esmeralda";
     const texto = document.getElementById('texto-letra').innerText;
-    doc.text(texto, 10, 10);
+    doc.setFontSize(16);
+    doc.text(titulo, 10, 10);
+    doc.setFontSize(12);
+    doc.text(texto, 10, 25);
     doc.save("musica.pdf");
 }

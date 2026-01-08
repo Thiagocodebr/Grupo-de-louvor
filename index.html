@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grupo de Louvor Santa Esmeralda</title>
+    <title>Louvor Santa Esmeralda</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -12,10 +12,10 @@
         .emoji-btn-toggle { font-size: 1.2rem; cursor: pointer; background: #333; border: 1px solid #555; border-radius: 4px; padding: 2px 8px; color: white; }
         .btn-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
         .agenda-box { background: rgba(0, 209, 178, 0.1); border: 1px solid #00d1b2; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center; }
-        .aviso-box { background: rgba(241, 196, 15, 0.1); border: 2px solid #f1c40f; border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .aviso-box { background: rgba(241, 196, 15, 0.1); border: 2px solid #f1c40f; border-radius: 8px; padding: 15px; margin-bottom: 25px; }
         .pix-box { background: linear-gradient(145deg, rgba(255, 77, 148, 0.1), rgba(255, 77, 148, 0.05)); border: 1px solid #ff4d94; border-radius: 12px; padding: 20px; margin-bottom: 25px; text-align: center; }
         .progress-bar-bg { background: #333; height: 12px; border-radius: 6px; margin: 15px 0 5px 0; overflow: hidden; cursor: pointer; border: 1px solid rgba(255, 77, 148, 0.3); }
-        .progress-bar-fill { background: #ff4d94; height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 10px rgba(255, 77, 148, 0.5); }
+        .progress-bar-fill { background: #ff4d94; height: 100%; width: 0%; transition: width 0.8s ease; box-shadow: 0 0 10px rgba(255, 77, 148, 0.5); }
         #countdown-container { background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px; margin: 10px 0; border: 1px solid rgba(241, 196, 15, 0.3); }
     </style>
 </head>
@@ -39,98 +39,65 @@
         <section id="repertorio" class="painel">
             <h2>✨ Repertório</h2>
             <div style="padding: 10px; font-size: 0.8rem; color: #888;">Músicas no Banco: <span id="contador-musicas" style="color: #00d1b2; font-weight: bold;">0</span></div>
-            <div style="padding: 10px;"><input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;"></div>
-            <div id="lista-musicas" class="lista-itens" style="max-height: 400px; overflow-y: auto;"><p>Carregando...</p></div>
-            <div class="referencias-box" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
-                <h3>🔗 Referência Temporária</h3>
-                <div style="display: flex; gap: 8px;">
-                    <input type="url" id="link-referencia" class="input-padrao" placeholder="Link..." style="flex-grow: 1;">
-                    <button id="btn-add-link" class="btn-acao">+</button>
-                </div>
-                <div id="lista-links-dinamica" style="margin-top: 10px;"></div>
-            </div>
+            <div style="padding: 10px;"><input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." style="width: 100%; padding: 10px; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #333;"></div>
+            <div id="lista-musicas" class="lista-itens" style="max-height: 400px; overflow-y: auto;">Carregando...</div>
         </section>
 
         <section id="editor-letras" class="painel">
             <h2>✍️ Editor de Letras</h2>
-            <div id="area-links-salvos" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444;">
-                <small style="color: #00d1b2; font-weight: bold;">📺 Referências Salvas:</small>
-                <div id="lista-links-visualizacao" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
-            </div>
-            <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                <label>Categoria:</label>
-                <select id="select-categoria" style="background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px;">
-                    <option value="Adoração">Adoração</option>
-                    <option value="Celebração">Celebração</option>
-                    <option value="Santa Ceia">Santa Ceia</option>
-                </select>
-            </div>
             <div class="toolbar">
-                <button type="button" onclick="execCmd('bold')"><b>B</b></button>
-                <button type="button" onclick="execCmd('italic')"><i>I</i></button>
-                <button type="button" onclick="execCmd('underline')"><u>U</u></button>
-                <input type="color" oninput="execCmd('foreColor', this.value)" title="Cor da Letra">
-                <div class="emoji-container">
-                    <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-editor')">😀</button>
-                    <div id="picker-editor" class="emoji-picker"></div>
-                </div>
+                <button type="button" onclick="execCmd('bold')">B</button>
+                <button type="button" onclick="execCmd('italic')">I</button>
+                <input type="color" oninput="execCmd('foreColor', this.value)">
+                <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-editor')">😀</button>
+                <div id="picker-editor" class="emoji-picker"></div>
             </div>
             <div id="texto-letra" class="editor-rich" contenteditable="true"></div>
             <div class="btn-container">
                 <button id="btn-salvar-letra" class="btn-acao">Salvar Tudo</button>
-                <button id="btn-gerar-pdf" class="btn-acao" style="background: #e67e22;">Gerar PDF</button>
-                <button id="btn-limpar-editor" class="btn-acao" style="background: #7f8c8d;">Limpar Editor</button>
+                <button id="btn-gerar-pdf" class="btn-acao" style="background: #e67e22;">PDF</button>
+                <button onclick="document.getElementById('texto-letra').innerHTML=''" class="btn-acao" style="background: #7f8c8d;">Limpar</button>
             </div>
         </section>
 
         <section id="comunidade" class="painel">
             <div class="pix-box">
-                <h2 style="color: #ff4d94; margin: 0; border: none; font-size: 1.2rem;">💖 Vaquinha do Grupo</h2>
-                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0;">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_AQUI" alt="QR Code" style="width: 100px; height: 100px;">
-                </div>
-                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
-                    <small style="color: #ff4d94; font-weight: bold; font-size: 0.6rem;">CHAVE PIX:</small>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span id="chave-pix-texto" style="font-size: 0.8rem;">seu-email@exemplo.com</span>
-                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 3px 7px; border-radius: 4px; font-size: 0.7rem;">Copiar</button>
-                    </div>
-                </div>
+                <h2 style="color: #ff4d94;">💖 Vaquinha</h2>
                 <div class="progress-bar-bg" onclick="definirValorVaquinha()">
                     <div class="progress-bar-fill"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #ff4d94; font-weight: bold;">
                     <span id="meta-label">Meta: R$ 200</span>
                     <span id="porcentagem-label">0%</span>
                 </div>
             </div>
 
             <div class="aviso-box">
-                <h2 style="color: #f1c40f; margin: 0; border: none; font-size: 1.2rem;">📌 Avisos</h2>
-                <div id="quadro-avisos-display" style="padding: 10px 0; min-height: 40px;">Carregando...</div>
-                <button onclick="editarQuadroAvisos()" style="width: 100%; background: #f1c40f; color: #000; border: none; padding: 6px; font-weight: bold; border-radius: 4px;">EDITAR</button>
+                <h2>📌 Quadro de Avisos</h2>
+                <div id="quadro-avisos-display" style="padding: 10px 0;">Carregando...</div>
+                <button onclick="editarQuadroAvisos()" class="btn-acao" style="width: 100%; background: #f1c40f; color: #000;">EDITAR</button>
             </div>
 
             <div class="agenda-box">
-                <h3 style="margin: 0; color: #00d1b2;">📅 Próximo Ensaio</h3>
-                <p id="data-ensaio-display" style="font-size: 1rem; margin: 5px 0; font-weight: bold;">Não definido</p>
-                
+                <h3>📅 Próximo Ensaio</h3>
+                <p id="data-ensaio-display" style="font-weight: bold;">Não definido</p>
                 <div id="countdown-container" style="display: none;">
-                    <small style="color: #888; display: block; margin-bottom: 2px;">FALTAM APENAS:</small>
-                    <span id="countdown-timer" style="color: #f1c40f; font-weight: bold; font-size: 1.2rem;">--</span>
+                    <span id="countdown-timer" style="color: #f1c40f; font-size: 1.2rem; font-weight: bold;"></span>
                 </div>
-
-                <button onclick="definirNovoEnsaio()" style="background: none; border: 1px dashed #00d1b2; color: #00d1b2; cursor: pointer; font-size: 0.7rem; padding: 2px 10px;">Mudar Data</button>
+                <button onclick="definirNovoEnsaio()" class="btn-acao" style="background: none; border: 1px dashed #00d1b2; color: #00d1b2;">Mudar Data</button>
             </div>
 
             <h2>💬 Chat</h2>
-            <div id="chat-mensagens" style="height: 200px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px;"></div>
-            <div class="emoji-container" style="display: flex; gap: 8px;">
+            <div id="chat-mensagens" style="height: 200px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 10px;"></div>
+            <div style="display: flex; gap: 8px;">
                 <input type="text" id="chat-input" placeholder="Conversar..." style="flex-grow: 1; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px;">
-                <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-chat')">😀</button>
-                <div id="picker-chat" class="emoji-picker" style="bottom: 50px; right: 60px;"></div>
-                <button id="btn-enviar-chat" class="btn-acao">Enviar</button>
+                <button onclick="enviarChat()" class="btn-acao">Enviar</button>
             </div>
+
+            <hr style="margin: 20px 0; border: 1px solid #333;">
+            <h2>💡 Mural de Ideias</h2>
+            <div id="mural-ideias-display" style="max-height: 200px; overflow-y: auto;"></div>
+            <button onclick="adicionarNovaIdeia()" class="btn-acao" style="width: 100%; margin-top: 10px; background: #f1c40f; color: #000;">Sugerir Nova Ideia</button>
         </section>
     </main>
 

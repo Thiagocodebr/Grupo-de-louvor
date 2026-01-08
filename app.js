@@ -230,3 +230,66 @@ window.toggleEmojiPicker = (id) => {
     p.innerHTML = BANCO_EMOJIS.map(e => `<span onclick="document.getElementById('texto-letra').innerHTML+='${e}'" style="cursor:pointer; padding:5px; font-size:1.2rem;">${e}</span>`).join('');
     p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
 };
+
+async function gerarLivretoCompleto() {
+    if (todasAsMusicas.length === 0) return alert("Nenhuma música para gerar o livreto!");
+    
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 40;
+
+    // 1. CAPA
+    doc.setFontSize(22);
+    doc.setTextColor(0, 209, 178); // Cor do Santa Esmeralda
+    doc.text("LIVRETO DE LOUVOR", 105, 80, { align: "center" });
+    doc.setFontSize(14);
+    doc.setTextColor(100);
+    doc.text("Grupo Santa Esmeralda", 105, 95, { align: "center" });
+    doc.text(`Data: ${new Date().toLocaleDateString()}`, 105, 110, { align: "center" });
+
+    // 2. ÍNDICE
+    doc.addPage();
+    doc.setFontSize(18);
+    doc.setTextColor(0);
+    doc.text("ÍNDICE", 10, 20);
+    doc.setFontSize(10);
+    
+    // Ordenar músicas por título
+    const musicasOrdenadas = [...todasAsMusicas].sort((a, b) => a.titulo.localeCompare(b.titulo));
+
+    musicasOrdenadas.forEach((m, index) => {
+        if (index > 0 && index % 40 === 0) doc.addPage(); // Nova página para o índice se for muito longo
+        doc.text(`${m.titulo} (${m.tom || 'N/D'})`, 15, 30 + (index % 40) * 6);
+    });
+
+    // 3. MÚSICAS (Uma por página)
+    musicasOrdenadas.forEach((m) => {
+        doc.addPage();
+        
+        // Título e Tom
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.text(m.titulo.toUpperCase(), 10, 20);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`TOM: ${m.tom || 'Não informado'} | Categoria: ${m.categoria || 'Geral'}`, 10, 28);
+        
+        // Letra
+        doc.setFontSize(11);
+        doc.setTextColor(50);
+        
+        // Limpar tags HTML da letra para o PDF e quebrar linhas
+        const textoLimpo = m.letra.replace(/<[^>]*>?/gm, ''); // Remove tags HTML
+        const splitText = doc.splitTextToSize(textoLimpo, 180);
+        
+        doc.text(splitText, 10, 40);
+        
+        // Rodapé com número da página
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Página ${pageCount}`, 105, 285, { align: "center" });
+    });
+
+    doc.save("Livreto_Santa_Esmeralda.pdf");
+}

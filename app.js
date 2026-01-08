@@ -1,47 +1,53 @@
 /**
- * CONFIGURAÇÕES INICIAIS
+ * CONFIGURAÇÃO GLOBAL
  */
 const API_URL = 'https://grupo-de-louvor-santa-esmeralda.onrender.com';
-let todasAsMusicas = [], timerInterval;
-const BANCO_EMOJIS = ['🙏','🎶','❤️','🙌','✨','🔥','😊','😂'];
+let todasAsMusicas = [];
+let timerInterval = null;
 
-// Proteção de Login
+// Verifica login imediatamente
 if (!localStorage.getItem('usuarioLogado')) {
     window.location.href = 'login.html';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const nome = localStorage.getItem('usuarioLogado');
-    const boasVindas = document.getElementById('boas-vindas');
-    if (boasVindas) boasVindas.innerText = `Olá, ${nome}!`;
-
-    // Disparar carregamentos
-    carregarMusicas();
-    carregarMensagensEChat();
-    carregarAgenda();
+/**
+ * INICIALIZAÇÃO SEGURA
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Iniciando sistema...");
     
-    // Atualização automática (Polling)
-    setInterval(carregarMensagensEChat, 10000);
+    // Atualiza nome do usuário
+    const boasVindas = document.getElementById('boas-vindas');
+    if (boasVindas) boasVindas.innerText = `Olá, ${localStorage.getItem('usuarioLogado')}!`;
 
-    // Listener para o campo de pesquisa (evita o "carregando" infinito)
-    document.getElementById('input-pesquisa')?.addEventListener('input', filtrarMusicas);
+    // Carregamento inicial com tratamento de erro individual
+    try { await carregarMusicas(); } catch (e) { console.error("Erro Musicas:", e); }
+    try { await carregarMensagensEChat(); } catch (e) { console.error("Erro Chat:", e); }
+    try { carregarAgenda(); } catch (e) { console.error("Erro Agenda:", e); }
+
+    // Polling (Atualização automática)
+    setInterval(() => {
+        carregarMensagensEChat().catch(e => console.log("Servidor dormindo..."));
+    }, 10000);
+
+    // Evento de Pesquisa
+    document.getElementById('input-pesquisa')?.addEventListener('input', (e) => {
+        const termo = e.target.value.toLowerCase();
+        const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
+        renderizarLista(filtradas);
+    });
 });
 
 /**
- * GESTÃO DE MÚSICAS (REPERTÓRIO)
+ * FUNÇÕES DE CARREGAMENTO
  */
 async function carregarMusicas() {
     const lista = document.getElementById('lista-musicas');
-    try {
-        const res = await fetch(`${API_URL}/musics`);
-        if (!res.ok) throw new Error('Erro na rede');
-        
-        todasAsMusicas = await res.json();
-        renderizarLista(todasAsMusicas);
-    } catch (e) {
-        console.error("Erro ao carregar músicas:", e);
-        if (lista) lista.innerHTML = "<p style='color: #ff4d4d; padding: 10px;'>Erro ao conectar com o servidor. Verifique se o Render está ativo.</p>";
-    }
+    const res = await fetch(`${API_URL}/musics`);
+    if (!res.ok) throw new Error("Erro ao buscar músicas");
+    
+    todasAsMusicas = await res.json();
+    renderizarLista(todasAsMusicas);
 }
 
 function renderizarLista(musicas) {
@@ -52,79 +58,66 @@ function renderizarLista(musicas) {
     if (!lista) return;
 
     if (musicas.length === 0) {
-        lista.innerHTML = "<p style='padding: 10px;'>Nenhuma música encontrada.</p>";
+        lista.innerHTML = '<p style="padding:15px; color:#888;">Nenhuma música encontrada.</p>';
         return;
     }
 
     lista.innerHTML = musicas.map(m => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #222;">
-            <span onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow:1;">${m.titulo}</span>
-            <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color:#ff4d4d; font-weight:bold; cursor:pointer; padding:5px;">&times;</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid #222; animation: fadeIn 0.3s;">
+            <span onclick="exibirLetra('${m._id}')" style="cursor:pointer; flex-grow:1; font-weight:500;">${m.titulo}</span>
+            <button onclick="excluirMusica('${m._id}')" style="background:none; border:none; color:#ff4d4d; cursor:pointer; font-size:1.2rem; padding:0 10px;">&times;</button>
         </div>
     `).join('');
 }
 
-function filtrarMusicas() {
-    const termo = document.getElementById('input-pesquisa').value.toLowerCase();
-    const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
-    renderizarLista(filtradas);
-}
-
-/**
- * SISTEMA DE CHAT, VAQUINHA E AVISOS
- */
 async function carregarMensagensEChat() {
-    try {
-        const res = await fetch(`${API_URL}/messages`);
-        const msgs = await res.json();
-        
-        // Atualizar Quadro de Avisos
-        const aviso = msgs.filter(m => m.texto.startsWith("SISTEMA_QUADRO:")).reverse()[0];
-        const quadroDisplay = document.getElementById('quadro-avisos-display');
-        if (quadroDisplay) quadroDisplay.innerText = aviso ? aviso.texto.split(':')[1] : "Sem avisos novos.";
-        
-        // Atualizar Chat
-        const chat = document.getElementById('chat-mensagens');
-        if (chat) {
-            chat.innerHTML = msgs.filter(m => !m.texto.includes("SISTEMA_") && !m.texto.includes("💡"))
-                .map(m => `<p><b style="color:#00d1b2">${m.usuario}:</b> ${m.texto}</p>`).join('');
-            chat.scrollTop = chat.scrollHeight;
-        }
+    const res = await fetch(`${API_URL}/messages`);
+    const msgs = await res.json();
+    
+    // 1. Quadro de Avisos
+    const aviso = msgs.filter(m => m.texto.startsWith("SISTEMA_QUADRO:")).reverse()[0];
+    const quadro = document.getElementById('quadro-avisos-display');
+    if (quadro) quadro.innerText = aviso ? aviso.texto.split(':')[1] : "Seja bem-vindo!";
 
-        // Atualizar Mural de Ideias
-        const mural = document.getElementById('mural-ideias-display');
-        if (mural) {
-            mural.innerHTML = msgs.filter(m => m.texto.includes("💡")).reverse()
-                .map(m => `<div style="background:#222; padding:8px; margin:5px 0; border-radius:5px; font-size: 0.9rem;">${m.texto}</div>`).join('');
-        }
+    // 2. Chat
+    const chat = document.getElementById('chat-mensagens');
+    if (chat) {
+        chat.innerHTML = msgs.filter(m => !m.texto.includes("SISTEMA_") && !m.texto.includes("💡"))
+            .map(m => `<p style="margin-bottom:8px;"><b style="color:#00d1b2">${m.usuario}:</b> ${m.texto}</p>`).join('');
+        chat.scrollTop = chat.scrollHeight;
+    }
 
-        // Atualizar Barra da Vaquinha
-        const v = msgs.filter(m => m.texto.startsWith("SISTEMA_VAQUINHA:")).reverse()[0];
-        const valor = v ? parseFloat(v.texto.split(':')[1]) : 0;
-        const perc = Math.min((valor / 200) * 100, 100);
-        const barra = document.querySelector('.progress-bar-fill');
-        const label = document.getElementById('porcentagem-label');
-        
-        if (barra) barra.style.width = perc + '%';
-        if (label) label.innerText = Math.floor(perc) + '%';
-
-    } catch(e) { console.log("Aguardando servidor..."); }
+    // 3. Vaquinha
+    const v = msgs.filter(m => m.texto.startsWith("SISTEMA_VAQUINHA:")).reverse()[0];
+    const valor = v ? parseFloat(v.texto.split(':')[1]) : 0;
+    const perc = Math.min((valor / 200) * 100, 100);
+    
+    const barra = document.querySelector('.progress-bar-fill');
+    if (barra) barra.style.width = perc + '%';
+    const pLabel = document.getElementById('porcentagem-label');
+    if (pLabel) pLabel.innerText = Math.floor(perc) + '%';
 }
 
 /**
- * UTILITÁRIOS (PIX, AGENDA, EDITOR)
+ * UTILITÁRIOS
  */
 window.copiarPix = () => {
-    const texto = document.getElementById('chave-pix-texto')?.innerText || "seu-email@exemplo.com";
-    navigator.clipboard.writeText(texto);
-    alert("Chave Pix copiada! ❤️");
+    const chave = document.getElementById('chave-pix-texto').innerText;
+    navigator.clipboard.writeText(chave).then(() => alert("Pix copiado! ❤️"));
 };
 
-window.definirNovoEnsaio = function() {
-    const input = prompt("Data do ensaio (AAAA-MM-DD HH:MM):", "2026-01-31 19:30");
-    if (input) {
-        localStorage.setItem('proximoEnsaio', input);
-        carregarAgenda();
+window.excluirMusica = async (id) => {
+    if (!confirm("Excluir música?")) return;
+    await fetch(`${API_URL}/musics/${id}`, { method: 'DELETE' });
+    carregarMusicas();
+};
+
+window.exibirLetra = (id) => {
+    const m = todasAsMusicas.find(x => x._id === id);
+    if (m) {
+        const editor = document.getElementById('texto-letra');
+        if (editor) editor.innerHTML = m.letra;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
@@ -132,43 +125,9 @@ function carregarAgenda() {
     const salva = localStorage.getItem('proximoEnsaio');
     const display = document.getElementById('data-ensaio-display');
     if (salva && display) {
-        display.innerText = new Date(salva).toLocaleString('pt-BR');
+        display.innerText = new Date(salva).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
         atualizarCronometro(salva);
     }
 }
 
-function atualizarCronometro(dataDestino) {
-    const display = document.getElementById('countdown-timer');
-    const container = document.getElementById('countdown-container');
-    if (timerInterval) clearInterval(timerInterval);
-
-    timerInterval = setInterval(() => {
-        const diff = new Date(dataDestino).getTime() - new Date().getTime();
-        if (diff <= 0) {
-            if (display) display.innerText = "É HOJE! 🔥";
-            return;
-        }
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff % 86400000) / 3600000);
-        const m = Math.floor((diff % 3600000) / 60000);
-        if (display) display.innerText = `${d}d ${h}h ${m}m`;
-        if (container) container.style.display = 'block';
-    }, 1000);
-}
-
-// Funções globais necessárias para o HTML
 window.sair = () => { localStorage.clear(); window.location.href = 'login.html'; };
-window.execCmd = (c, v=null) => document.execCommand(c, false, v);
-window.enviarChat = () => {
-    const i = document.getElementById('chat-input');
-    if (i && i.value) { enviarMensagemAoServidor(i.value, localStorage.getItem('usuarioLogado')); i.value = ''; }
-};
-
-async function enviarMensagemAoServidor(texto, usuario) {
-    await fetch(`${API_URL}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto, usuario })
-    });
-    carregarMensagensEChat();
-}

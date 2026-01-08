@@ -39,16 +39,12 @@ async function executarCarregamentoInicial() {
  * LÓGICA DE CIFRAS E ACORDES (SISTEMA INTELIGENTE)
  */
 function destacarAcordes(textoHtml) {
-    // Regex para identificar acordes (Ex: C, G7, Am, D/F#)
-    // Evita substituir acordes dentro de tags HTML usando um parser temporário
     const div = document.createElement('div');
     div.innerHTML = textoHtml;
-
     const regexAcordes = /\b([A-G][b#]?(2|4|5|6|7|9|11|13|maj7|maj9|min7|m7|m|sus2|sus4|add9|dim|aug)?(\/[A-G][b#]?)?)\b/g;
 
-    // Função recursiva para processar apenas nós de texto
     const processarNode = (node) => {
-        if (node.nodeType === 3) { // Nó de texto
+        if (node.nodeType === 3) { 
             const span = document.createElement('span');
             span.innerHTML = node.nodeValue.replace(regexAcordes, (acorde) => {
                 return `<span style="color: #f1c40f; font-weight: bold; background: rgba(241, 196, 15, 0.15); padding: 1px 4px; border-radius: 4px;">${acorde}</span>`;
@@ -58,7 +54,6 @@ function destacarAcordes(textoHtml) {
             node.childNodes.forEach(processarNode);
         }
     };
-
     processarNode(div);
     return div.innerHTML;
 }
@@ -68,7 +63,7 @@ function destacarAcordes(textoHtml) {
  */
 window.execCmd = (comando, valor = null) => {
     document.execCommand(comando, false, valor);
-    document.getElementById('texto-letra').focus(); // Garante que o foco volte ao editor
+    document.getElementById('texto-letra').focus();
 };
 
 /**
@@ -100,6 +95,17 @@ function renderizarLista(musicas) {
         `).join('');
 }
 
+function filtrarMusicas() {
+    const termo = document.getElementById('input-pesquisa').value.toLowerCase();
+    const filtradas = todasAsMusicas.filter(m => m.titulo.toLowerCase().includes(termo));
+    renderizarLista(filtradas);
+}
+
+window.filtrarCategoria = (cat) => {
+    const filtradas = todasAsMusicas.filter(m => m.categoria === cat);
+    renderizarLista(filtradas);
+};
+
 async function salvarMusica() {
     const titulo = prompt("Título da música:");
     const letra = document.getElementById('texto-letra').innerHTML;
@@ -118,6 +124,8 @@ async function salvarMusica() {
     if (res.ok) {
         alert("Música salva com sucesso! ✨");
         carregarMusicas();
+        document.getElementById('link-midia').value = "";
+        document.getElementById('tom-musica').value = "";
     }
 }
 
@@ -127,10 +135,16 @@ window.exibirLetra = (id) => {
 
     let letraExibicao = destacarAcordes(m.letra);
 
+    // Link reativado e formatado como botão
+    const linkHTML = m.link ? `
+        <a href="${m.link}" target="_blank" style="background:#1DB954; color:white; padding:5px 12px; border-radius:15px; text-decoration:none; font-size:0.75rem; font-weight:bold; display:flex; align-items:center; gap:5px;">
+            📺 ABRIR APOIO
+        </a>` : '';
+
     const header = `
         <div style="margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #333; display:flex; justify-content:space-between; align-items:center;">
             <span style="background:#f1c40f; color:#000; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:0.85rem;">TOM: ${m.tom || 'N/D'}</span>
-            ${m.link ? `<a href="${m.link}" target="_blank" style="color:#1DB954; font-weight:bold; font-size:0.8rem; text-decoration:none;">📺 ABRIR VÍDEO</a>` : ''}
+            ${linkHTML}
         </div>
     `;
     
@@ -145,17 +159,29 @@ async function carregarMensagensEChat() {
     const res = await fetch(`${API_URL}/messages`);
     const msgs = await res.json();
     
-    // Quadro de Avisos
     const aviso = msgs.filter(m => m.texto.startsWith("SISTEMA_QUADRO:")).reverse()[0];
     const qDisplay = document.getElementById('quadro-avisos-display');
     if (qDisplay) qDisplay.innerText = aviso ? aviso.texto.split(':')[1] : "Sem avisos.";
 
-    // Chat
+    const v = msgs.filter(m => m.texto.startsWith("SISTEMA_VAQUINHA:")).reverse()[0];
+    const valorVaquinha = v ? parseFloat(v.texto.split(':')[1]) : 0;
+    const perc = Math.min((valorVaquinha / 200) * 100, 100);
+    const barra = document.querySelector('.progress-bar-fill');
+    if (barra) barra.style.width = perc + '%';
+    const pLabel = document.getElementById('porcentagem-label');
+    if (pLabel) pLabel.innerText = Math.floor(perc) + '%';
+
     const chat = document.getElementById('chat-mensagens');
     if (chat) {
         chat.innerHTML = msgs.filter(m => !m.texto.includes("SISTEMA_") && !m.texto.includes("💡"))
             .map(m => `<p><b style="color:#00d1b2">${m.usuario}:</b> ${m.texto}</p>`).join('');
         chat.scrollTop = chat.scrollHeight;
+    }
+
+    const mural = document.getElementById('mural-ideias-display');
+    if (mural) {
+        mural.innerHTML = msgs.filter(m => m.texto.includes("💡")).reverse()
+            .map(m => `<div style="background:#222; padding:8px; margin:5px 0; border-radius:5px;">${m.texto}</div>`).join('');
     }
 }
 
@@ -203,6 +229,9 @@ async function enviarMensagem(texto, usuario) {
 
 window.sair = () => { localStorage.clear(); window.location.href = 'login.html'; };
 
+/**
+ * EXPORTAÇÃO (PDF E LIVRETO)
+ */
 async function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -211,15 +240,62 @@ async function gerarPDF() {
     doc.setFontSize(16);
     doc.text(titulo, 10, 10);
     doc.setFontSize(12);
-    // Quebra o texto para não sair da folha
     const splitText = doc.splitTextToSize(texto, 180);
     doc.text(splitText, 10, 25);
     doc.save("musica.pdf");
 }
 
-// Funções de interface restantes (Quadro, Vaquinha, etc) permanecem as mesmas
-window.filtrarMusicas = filtrarMusicas;
+async function gerarLivretoCompleto() {
+    if (todasAsMusicas.length === 0) return alert("Nenhuma música para gerar o livreto!");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(22);
+    doc.setTextColor(0, 209, 178);
+    doc.text("LIVRETO DE LOUVOR", 105, 80, { align: "center" });
+    doc.setFontSize(14);
+    doc.setTextColor(100);
+    doc.text("Grupo Santa Esmeralda", 105, 95, { align: "center" });
+    doc.text(`Gerado em: ${new Date().toLocaleDateString()}`, 105, 110, { align: "center" });
+
+    doc.addPage();
+    doc.setFontSize(18);
+    doc.setTextColor(0);
+    doc.text("ÍNDICE", 10, 20);
+    doc.setFontSize(10);
+    const musicasOrdenadas = [...todasAsMusicas].sort((a, b) => a.titulo.localeCompare(b.titulo));
+    musicasOrdenadas.forEach((m, index) => {
+        if (index > 0 && index % 40 === 0) doc.addPage();
+        doc.text(`${m.titulo} (${m.tom || 'N/D'})`, 15, 30 + (index % 40) * 6);
+    });
+
+    musicasOrdenadas.forEach((m) => {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.text(m.titulo.toUpperCase(), 10, 20);
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`TOM: ${m.tom || 'N/D'} | Categoria: ${m.categoria || 'Geral'}`, 10, 28);
+        doc.setFontSize(11);
+        doc.setTextColor(50);
+        const textoLimpo = m.letra.replace(/<[^>]*>?/gm, '');
+        const splitText = doc.splitTextToSize(textoLimpo, 180);
+        doc.text(splitText, 10, 40);
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(8);
+        doc.text(`Página ${pageCount}`, 105, 285, { align: "center" });
+    });
+    doc.save("Livreto_Santa_Esmeralda.pdf");
+}
+
+/**
+ * OUTRAS FUNÇÕES DE INTERFACE
+ */
 window.copiarPix = () => { navigator.clipboard.writeText(document.getElementById('chave-pix-texto').innerText); alert("Copiado!"); };
+window.editarQuadroAvisos = () => { const n = prompt("Novo aviso:"); if (n) enviarMensagem(`SISTEMA_QUADRO:${n}`, "LÍDER"); };
+window.definirValorVaquinha = () => { const v = prompt("Valor arrecadado:"); if (v) enviarMensagem(`SISTEMA_VAQUINHA:${v}`, "SISTEMA"); };
+window.adicionarNovaIdeia = () => { const id = prompt("Sua ideia:"); if (id) enviarMensagem(`💡 IDEIA: ${id}`, localStorage.getItem('usuarioLogado')); };
 window.definirNovoEnsaio = () => {
     const input = prompt("Data (AAAA-MM-DD HH:MM):", "2026-01-31 19:30");
     if (input) { localStorage.setItem('proximoEnsaio', input); carregarAgenda(); enviarMensagem(`📅 NOVO ENSAIO: ${input}`, localStorage.getItem('usuarioLogado')); }
@@ -230,66 +306,3 @@ window.toggleEmojiPicker = (id) => {
     p.innerHTML = BANCO_EMOJIS.map(e => `<span onclick="document.getElementById('texto-letra').innerHTML+='${e}'" style="cursor:pointer; padding:5px; font-size:1.2rem;">${e}</span>`).join('');
     p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
 };
-
-async function gerarLivretoCompleto() {
-    if (todasAsMusicas.length === 0) return alert("Nenhuma música para gerar o livreto!");
-    
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let y = 40;
-
-    // 1. CAPA
-    doc.setFontSize(22);
-    doc.setTextColor(0, 209, 178); // Cor do Santa Esmeralda
-    doc.text("LIVRETO DE LOUVOR", 105, 80, { align: "center" });
-    doc.setFontSize(14);
-    doc.setTextColor(100);
-    doc.text("Grupo Santa Esmeralda", 105, 95, { align: "center" });
-    doc.text(`Data: ${new Date().toLocaleDateString()}`, 105, 110, { align: "center" });
-
-    // 2. ÍNDICE
-    doc.addPage();
-    doc.setFontSize(18);
-    doc.setTextColor(0);
-    doc.text("ÍNDICE", 10, 20);
-    doc.setFontSize(10);
-    
-    // Ordenar músicas por título
-    const musicasOrdenadas = [...todasAsMusicas].sort((a, b) => a.titulo.localeCompare(b.titulo));
-
-    musicasOrdenadas.forEach((m, index) => {
-        if (index > 0 && index % 40 === 0) doc.addPage(); // Nova página para o índice se for muito longo
-        doc.text(`${m.titulo} (${m.tom || 'N/D'})`, 15, 30 + (index % 40) * 6);
-    });
-
-    // 3. MÚSICAS (Uma por página)
-    musicasOrdenadas.forEach((m) => {
-        doc.addPage();
-        
-        // Título e Tom
-        doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text(m.titulo.toUpperCase(), 10, 20);
-        
-        doc.setFontSize(10);
-        doc.setTextColor(150);
-        doc.text(`TOM: ${m.tom || 'Não informado'} | Categoria: ${m.categoria || 'Geral'}`, 10, 28);
-        
-        // Letra
-        doc.setFontSize(11);
-        doc.setTextColor(50);
-        
-        // Limpar tags HTML da letra para o PDF e quebrar linhas
-        const textoLimpo = m.letra.replace(/<[^>]*>?/gm, ''); // Remove tags HTML
-        const splitText = doc.splitTextToSize(textoLimpo, 180);
-        
-        doc.text(splitText, 10, 40);
-        
-        // Rodapé com número da página
-        const pageCount = doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.text(`Página ${pageCount}`, 105, 285, { align: "center" });
-    });
-
-    doc.save("Livreto_Santa_Esmeralda.pdf");
-}

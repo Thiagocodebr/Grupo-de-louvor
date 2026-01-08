@@ -7,67 +7,19 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* Seus estilos integrados */
-        .toolbar {
-            background: #222; padding: 10px; border: 1px solid #444;
-            border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap;
-            border-radius: 8px 8px 0 0; align-items: center;
-        }
-        .editor-rich {
-            min-height: 400px; background: #1a1a1a; color: white;
-            padding: 15px; border: 1px solid #444; border-radius: 0 0 8px 8px;
-            outline: none; overflow-y: auto; line-height: 1.6;
-        }
+        .toolbar { background: #222; padding: 10px; border: 1px solid #444; border-bottom: none; display: flex; gap: 8px; flex-wrap: wrap; border-radius: 8px 8px 0 0; align-items: center; }
+        .editor-rich { min-height: 400px; background: #1a1a1a; color: white; padding: 15px; border: 1px solid #444; border-radius: 0 0 8px 8px; outline: none; overflow-y: auto; line-height: 1.6; }
         .emoji-btn-toggle { font-size: 1.2rem; cursor: pointer; background: #333; border: 1px solid #555; border-radius: 4px; padding: 2px 8px; color: white; }
         .btn-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
-        
-        .agenda-box {
-            background: rgba(0, 209, 178, 0.1);
-            border: 1px solid #00d1b2;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .aviso-box {
-            background: rgba(241, 196, 15, 0.1);
-            border: 2px solid #f1c40f;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        /* Estilo para a Seção de Doação/Vaquinha */
-        .pix-box {
-            background: linear-gradient(145deg, rgba(255, 77, 148, 0.1), rgba(255, 77, 148, 0.05));
-            border: 1px solid #ff4d94;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        .progress-bar-bg {
-            background: #333;
-            height: 12px;
-            border-radius: 6px;
-            margin: 15px 0 5px 0;
-            overflow: hidden;
-            cursor: pointer; /* Indica que é clicável */
-            border: 1px solid rgba(255, 77, 148, 0.3);
-        }
-        .progress-bar-fill {
-            background: #ff4d94;
-            height: 100%;
-            width: 0%; /* Começa em 0, o app.js vai preencher */
-            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 0 10px rgba(255, 77, 148, 0.5);
-        }
+        .agenda-box { background: rgba(0, 209, 178, 0.1); border: 1px solid #00d1b2; border-radius: 8px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .aviso-box { background: rgba(241, 196, 15, 0.1); border: 2px solid #f1c40f; border-radius: 8px; padding: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .pix-box { background: linear-gradient(145deg, rgba(255, 77, 148, 0.1), rgba(255, 77, 148, 0.05)); border: 1px solid #ff4d94; border-radius: 12px; padding: 20px; margin-bottom: 25px; text-align: center; }
+        .progress-bar-bg { background: #333; height: 12px; border-radius: 6px; margin: 15px 0 5px 0; overflow: hidden; cursor: pointer; border: 1px solid rgba(255, 77, 148, 0.3); }
+        .progress-bar-fill { background: #ff4d94; height: 100%; width: 0%; transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 10px rgba(255, 77, 148, 0.5); }
+        #countdown-container { background: rgba(0,0,0,0.3); border-radius: 6px; padding: 8px; margin: 10px 0; border: 1px solid rgba(241, 196, 15, 0.3); }
     </style>
 </head>
 <body>
-
     <audio id="audio-hover" src="audios/click-buttons-ui-menu-sounds-effects-button-14-205402.mp3" preload="auto"></audio>
 
     <header class="cabecalho">
@@ -77,26 +29,18 @@
         </div>
         <h1 class="titulo-principal">🎶 Grupo de Louvor Santa Esmeralda</h1>
         <nav class="navegacao">
-            <a href="#editor-letras" class="nav-link js-hover-target">Letras</a>
-            <a href="#repertorio" class="nav-link js-hover-target">Repertório</a>
-            <a href="#comunidade" class="nav-link js-hover-target">Comunidade</a>
+            <a href="#editor-letras" class="nav-link">Letras</a>
+            <a href="#repertorio" class="nav-link">Repertório</a>
+            <a href="#comunidade" class="nav-link">Comunidade</a>
         </nav>
     </header>
 
     <main class="conteudo-principal">
-        
         <section id="repertorio" class="painel">
             <h2>✨ Repertório</h2>
-            <div style="padding: 10px; font-size: 0.8rem; color: #888;">
-                Músicas no Banco: <span id="contador-musicas" style="color: #00d1b2; font-weight: bold;">0</span>
-            </div>
-            <div style="padding: 10px;">
-                <input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;">
-            </div>
-            <div id="lista-musicas" class="lista-itens" style="max-height: 400px; overflow-y: auto;">
-                <p>Carregando...</p>
-            </div>
-
+            <div style="padding: 10px; font-size: 0.8rem; color: #888;">Músicas no Banco: <span id="contador-musicas" style="color: #00d1b2; font-weight: bold;">0</span></div>
+            <div style="padding: 10px;"><input type="text" id="input-pesquisa" placeholder="🔍 Pesquisar música..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;"></div>
+            <div id="lista-musicas" class="lista-itens" style="max-height: 400px; overflow-y: auto;"><p>Carregando...</p></div>
             <div class="referencias-box" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
                 <h3>🔗 Referência Temporária</h3>
                 <div style="display: flex; gap: 8px;">
@@ -113,7 +57,6 @@
                 <small style="color: #00d1b2; font-weight: bold;">📺 Referências Salvas:</small>
                 <div id="lista-links-visualizacao" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;"></div>
             </div>
-            
             <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
                 <label>Categoria:</label>
                 <select id="select-categoria" style="background: #333; color: white; border: 1px solid #555; padding: 5px; border-radius: 4px;">
@@ -122,22 +65,17 @@
                     <option value="Santa Ceia">Santa Ceia</option>
                 </select>
             </div>
-
             <div class="toolbar">
                 <button type="button" onclick="execCmd('bold')"><b>B</b></button>
                 <button type="button" onclick="execCmd('italic')"><i>I</i></button>
                 <button type="button" onclick="execCmd('underline')"><u>U</u></button>
                 <input type="color" oninput="execCmd('foreColor', this.value)" title="Cor da Letra">
-                
                 <div class="emoji-container">
                     <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-editor')">😀</button>
                     <div id="picker-editor" class="emoji-picker"></div>
                 </div>
-                
-                <small style="color:#666; font-size:0.6rem; margin-left:auto;">Dica: Win + .</small>
             </div>
             <div id="texto-letra" class="editor-rich" contenteditable="true"></div>
-            
             <div class="btn-container">
                 <button id="btn-salvar-letra" class="btn-acao">Salvar Tudo</button>
                 <button id="btn-gerar-pdf" class="btn-acao" style="background: #e67e22;">Gerar PDF</button>
@@ -146,67 +84,54 @@
         </section>
 
         <section id="comunidade" class="painel">
-            
             <div class="pix-box">
-                <h2 style="color: #ff4d94; margin: 0; border: none; font-size: 1.2rem;">💖 Doe Agora / Vaquinha</h2>
-                <p style="font-size: 0.75rem; color: #bbb; margin: 8px 0;">Ajude com equipamentos e manutenção do nosso louvor.</p>
-                
-                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_AQUI" 
-                         alt="QR Code Pix" style="width: 120px; height: 120px; display: block;">
+                <h2 style="color: #ff4d94; margin: 0; border: none; font-size: 1.2rem;">💖 Vaquinha do Grupo</h2>
+                <div style="background: white; padding: 8px; display: inline-block; border-radius: 10px; margin: 10px 0;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SUA_CHAVE_AQUI" alt="QR Code" style="width: 100px; height: 100px;">
                 </div>
-
-                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 77, 148, 0.2);">
-                    <small style="color: #ff4d94; font-weight: bold; font-size: 0.65rem; text-transform: uppercase;">Chave Pix:</small>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px;">
-                        <span id="chave-pix-texto" style="font-size: 0.85rem; color: #fff; word-break: break-all;">seu-email@exemplo.com</span>
-                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold;">Copiar</button>
+                <div style="text-align: left; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+                    <small style="color: #ff4d94; font-weight: bold; font-size: 0.6rem;">CHAVE PIX:</small>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="chave-pix-texto" style="font-size: 0.8rem;">seu-email@exemplo.com</span>
+                        <button onclick="copiarPix()" style="background: #ff4d94; border: none; color: #fff; padding: 3px 7px; border-radius: 4px; font-size: 0.7rem;">Copiar</button>
                     </div>
                 </div>
-
-                <div class="progress-bar-bg" onclick="definirValorVaquinha()" title="Clique para atualizar o valor (Líder)">
+                <div class="progress-bar-bg" onclick="definirValorVaquinha()">
                     <div class="progress-bar-fill"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold; margin-top: 5px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: #ff4d94; font-weight: bold;">
                     <span id="meta-label">Meta: R$ 200</span>
                     <span id="porcentagem-label">0%</span>
                 </div>
             </div>
 
             <div class="aviso-box">
-                <h2 style="color: #f1c40f; margin: 0; border: none; font-size: 1.2rem;">📌 Quadro de Avisos</h2>
-                <div id="quadro-avisos-display" style="padding: 10px 0; min-height: 40px; color: #fff; font-size: 0.95rem; line-height: 1.4;">
-                    Carregando avisos importantes...
-                </div>
-                <button onclick="editarQuadroAvisos()" style="width: 100%; background: #f1c40f; color: #000; border: none; padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 0.8rem;">
-                    📝 EDITAR QUADRO
-                </button>
+                <h2 style="color: #f1c40f; margin: 0; border: none; font-size: 1.2rem;">📌 Avisos</h2>
+                <div id="quadro-avisos-display" style="padding: 10px 0; min-height: 40px;">Carregando...</div>
+                <button onclick="editarQuadroAvisos()" style="width: 100%; background: #f1c40f; color: #000; border: none; padding: 6px; font-weight: bold; border-radius: 4px;">EDITAR</button>
             </div>
 
             <div class="agenda-box">
                 <h3 style="margin: 0; color: #00d1b2;">📅 Próximo Ensaio</h3>
-                <p id="data-ensaio-display" style="font-size: 1.1rem; margin: 10px 0; font-weight: bold;">Não definido</p>
-                <button onclick="definirNovoEnsaio()" style="background: none; border: 1px dashed #00d1b2; color: #00d1b2; cursor: pointer; font-size: 0.7rem; padding: 2px 10px;">Atualizar Data</button>
+                <p id="data-ensaio-display" style="font-size: 1rem; margin: 5px 0; font-weight: bold;">Não definido</p>
+                
+                <div id="countdown-container" style="display: none;">
+                    <small style="color: #888; display: block; margin-bottom: 2px;">FALTAM APENAS:</small>
+                    <span id="countdown-timer" style="color: #f1c40f; font-weight: bold; font-size: 1.2rem;">--</span>
+                </div>
+
+                <button onclick="definirNovoEnsaio()" style="background: none; border: 1px dashed #00d1b2; color: #00d1b2; cursor: pointer; font-size: 0.7rem; padding: 2px 10px;">Mudar Data</button>
             </div>
 
             <h2>💬 Chat</h2>
-            <div id="chat-mensagens" style="height: 250px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; font-size: 0.9rem;"></div>
-            
-            <div class="emoji-container" style="display: flex; gap: 8px; margin-bottom: 30px;">
-                <input type="text" id="chat-input" placeholder="Conversar..." style="flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #1a1a1a; color: white;">
-                <div style="position: relative;">
-                    <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-chat')">😀</button>
-                    <div id="picker-chat" class="emoji-picker" style="bottom: 45px; right: 0;"></div>
-                </div>
+            <div id="chat-mensagens" style="height: 200px; overflow-y: auto; background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px;"></div>
+            <div class="emoji-container" style="display: flex; gap: 8px;">
+                <input type="text" id="chat-input" placeholder="Conversar..." style="flex-grow: 1; padding: 10px; background: #1a1a1a; color: white; border: 1px solid #333; border-radius: 8px;">
+                <button type="button" class="emoji-btn-toggle" onclick="toggleEmojiPicker('picker-chat')">😀</button>
+                <div id="picker-chat" class="emoji-picker" style="bottom: 50px; right: 60px;"></div>
                 <button id="btn-enviar-chat" class="btn-acao">Enviar</button>
             </div>
-
-            <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
-            <h2>💡 Mural de Ideias</h2>
-            <div id="mural-ideias-display" style="min-height: 150px; padding: 5px; overflow-y: auto; max-height: 250px;"></div>
-            <button id="btn-nova-ideia" class="btn-acao" style="width: 100%; margin-top: 10px; background: #f1c40f; color: #000; font-weight: bold;">Sugerir Nova Ideia</button>
         </section>
-
     </main>
 
     <script src="app.js"></script>
